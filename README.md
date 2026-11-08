@@ -1,69 +1,34 @@
-# 🚀 DevRoadmap & Tracker de Proyectos
+# 🚀 DevRoadmap & Control de Procesos de Proyectos
 
-Una aplicación web moderna, interactiva y ligera diseñada para planificar proyectos futuros, estimar tiempos, definir niveles de complejidad y llevar un registro riguroso de revisiones e hitos con cálculo automático de progreso.
-
----
-
-## 🌟 Características Principales
-
-1. **Dashboard con Métricas en Tiempo Real (KPIs)**:
-   - Contador total de proyectos (activos vs completados).
-   - Progreso global promedio ponderado.
-   - Total de horas estimadas vs horas reales invertidas.
-   - Conteo de revisiones e hitos pendientes y superados.
-
-2. **Control de Complejidad & Tiempos**:
-   - Clasificación por nivel de complejidad con código de colores:
-     - 🟢 **Baja**: Tareas rápidas o MVPs (1 a 3 semanas).
-     - 🔵 **Media**: Desarrollo estándar o funcionalidades moderadas (3 a 6 semanas).
-     - 🟠 **Alta**: Sistemas multicapa, arquitecturas complejas o integraciones avanzadas.
-     - 🔴 **Muy Alta**: Proyectos críticos, alta concurrencia o requerimientos extensos.
-   - Registro de tiempo estimado en horas.
-   - Frecuencia programada de revisiones (Diaria, Cada 2-3 días, Semanal, Quincenal, Mensual).
-
-3. **Seguimiento de Revisiones e Hitos (Checkpoints)**:
-   - Lista interactiva de hitos con checkboxes que actualizan el progreso automáticamente.
-   - Registro de revisiones con historial: horas dedicadas por sesión, notas/feedback técnico y dictamen (Superada, Con Observaciones, Bloqueada).
-   - Acceso rápido a incremento de progreso (+10%).
-
-4. **Búsqueda, Filtros y Vistas**:
-   - Búsqueda en tiempo real por título, categoría o descripción.
-   - Filtrado por estado (Planificado, En Progreso, En Revisión, Completado, Pausado).
-   - Filtrado por nivel de complejidad.
-   - Ordenamiento inteligente (Última actualización, Progreso, Horas estimadas, Complejidad).
-   - Alternador de diseño: Vista de tarjetas (Grid) o Vista compacta (Lista).
-
-5. **Persistencia & Portabilidad**:
-   - Almacenamiento local automático en el navegador (`localStorage`), sin proyectos predefinidos ni datos ficticios.
-   - Botón para exportar tus proyectos en formato **JSON** en cualquier momento.
+Sistema interactivo para gestión visual de proyectos y actividades, diseñado con una vista en árbol de procesos, controles deslizantes de progreso en vivo, bitácora de notas y resumen gerencial.
 
 ---
 
-## 💻 ¿Cómo abrir y usar la aplicación?
+## 📸 Interfaz y Funcionalidades
 
-No requiere instalar Node.js ni compilar ningún paquete.
+### 1. Barra de Control del Proyecto
+- **`+ Agregar actividad`** (Botón cyan destacado): Registra una nueva tarea/proceso especificando nombre, rol/responsable, fecha límite y estado.
+- **`Seguimiento`**: Historial de auditoría y notas de seguimiento del proyecto con fechas.
+- **`Resumen gerencial`**: Panel ejecutivo con métricas de salud del proyecto, porcentaje general promediado, desglose de actividades (*En ejecución*, *Atrasadas*, *Completadas*) y tiempos.
+- **`Editar proyecto`**: Modifica la complejidad (Baja, Media, Alta, Muy Alta), frecuencia de revisiones y horas estimadas.
+- **`Eliminar proyecto`**: Borrado seguro del proyecto y sus actividades.
 
-1. **Abrir en el Navegador**:
-   - Haz doble clic en el archivo `index.html` ubicado en:
-     ```
-     C:\Users\alexa\.gemini\antigravity\scratch\project-roadmap-tracker\index.html
-     ```
-   - O ábrelo directamente en tu navegador favorito (Chrome, Edge, Firefox, Brave).
+### 2. Tarjetas de Actividades y Procesos (Timeline Tree)
+- Conexión visual en árbol vertical con líneas de guía y conector `↳`.
+- **Información de la actividad**: Nombre destacado, rol del responsable, fecha de vencimiento y badge de estado (*Atrasado*, *En ejecución*, *Completado*, *Por iniciar*).
+- **Control Deslizante en Vivo (Slider)**: Ajusta el porcentaje arrastrando directamente el control deslizante con actualización instantánea del progreso y recálculo automático del avance total del proyecto.
+- **`Notas (X) ▾`**: Menú desplegable para revisar observaciones previas y agregar nuevas notas de revisión.
+- **`Editar` & `Quitar`**: Gestión directa de cada actividad.
 
-2. **Abrir en Antigravity / VS Code**:
-   - Te recomendamos establecer esta carpeta como tu espacio de trabajo activo:
-     ```
-     C:\Users\alexa\.gemini\antigravity\scratch\project-roadmap-tracker
-     ```
+### 3. Selector Multi-Proyecto & Persistencia
+- Cambia fácilmente entre diferentes proyectos desde la barra superior.
+- Almacenamiento local automático en el navegador (`localStorage`).
+- Botón de **Exportar** para respaldar tus proyectos en formato JSON.
 
 ---
 
-## 📁 Estructura del Proyecto
+## 💻 Uso Local y en GitHub Pages
 
-```
-project-roadmap-tracker/
-├── index.html        # Estructura de la aplicación y modales
-├── style.css         # Estilos personalizados, animaciones y scrollbars
-├── app.js            # Lógica reactiva, métricas, persistencia y eventos
-└── README.md         # Documentación de uso
-```
+- **En local**: Abre el archivo [`index.html`](file:///C:/Users/alexa/.gemini/antigravity/scratch/project-roadmap-tracker/index.html) en cualquier navegador web.
+- **En GitHub**: [AnGeLJoHnLl/procesos_proyeco](https://github.com/AnGeLJoHnLl/procesos_proyeco)
+- **Web en vivo (GitHub Pages)**: `https://angeljohnll.github.io/procesos_proyeco/`

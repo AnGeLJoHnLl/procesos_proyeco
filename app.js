@@ -1,61 +1,77 @@
 /**
- * DevRoadmap & Project Tracker
- * Logic for managing projects, complexity, time estimates, and revision milestones
+ * DevRoadmap & Project Tracker - Activity Tree & Project View
+ * Inspired by executive workflow dashboard with interactive sliders, notes and review logs
  */
 
-// App State: Starts completely clean and empty (no pre-made projects)
+const STORAGE_KEY = 'dev_roadmap_projects_tree_v1';
+
+// Initial template project matching the user's screenshot
+const INITIAL_PROJECTS = [
+  {
+    id: 'proj-demo-1',
+    title: 'Proyecto de Automatización y BI',
+    description: 'Implementación de diagnóstico de fuentes y desarrollo de flujos automatizados.',
+    complexity: 'alta', // baja | media | alta | muy_alta
+    revisionFrequency: 'Semanal',
+    estimatedHours: 80,
+    deadline: '2026-11-30',
+    reviews: [
+      { id: 'rev-1', date: '2026-10-15', text: 'Revisión inicial completada. Se detectaron fuentes pendientes de validación.' }
+    ],
+    activities: [
+      {
+        id: 'act-1',
+        title: 'Diagnóstico de fuentes',
+        role: 'Analista BI',
+        dueDate: '2026-10-15',
+        status: 'atrasado', // atrasado | ejecucion | completado | por_iniciar
+        progress: 30,
+        notes: [
+          { id: 'n-1', date: '2026-10-14', text: 'Pendiente acceso a la base de datos de producción.' }
+        ]
+      },
+      {
+        id: 'act-2',
+        title: 'Desarrollo de automatización',
+        role: 'Desarrollador',
+        dueDate: '2026-11-20',
+        status: 'ejecucion',
+        progress: 0,
+        notes: []
+      }
+    ]
+  }
+];
+
+// App State
 let projects = [];
-let currentLayout = 'grid'; // 'grid' | 'list'
+let activeProjectId = null;
 
-// Storage key for user projects
-const STORAGE_KEY = 'dev_roadmap_user_projects_v1';
-
-// Empty fallback
-const DEMO_PROJECTS = [];
-
-// Complexity dictionary
-const COMPLEXITY_CONFIG = {
-  baja: {
-    label: 'Baja Complejidad',
-    badgeClass: 'badge-complexity-baja',
-    icon: 'smile',
-    estimateHelp: 'Rápido (1 a 3 semanas)'
+// Status styling and text dictionary
+const STATUS_CONFIG = {
+  atrasado: {
+    label: 'Atrasado',
+    className: 'badge-status-atrasado'
   },
-  media: {
-    label: 'Complejidad Media',
-    badgeClass: 'badge-complexity-media',
-    icon: 'sliders',
-    estimateHelp: 'Moderado (3 a 6 semanas)'
+  ejecucion: {
+    label: 'En ejecución',
+    className: 'badge-status-ejecucion'
   },
-  alta: {
-    label: 'Alta Complejidad',
-    badgeClass: 'badge-complexity-alta',
-    icon: 'zap',
-    estimateHelp: 'Complejo (1 a 3 meses)'
+  completado: {
+    label: 'Completado',
+    className: 'badge-status-completado'
   },
-  muy_alta: {
-    label: 'Muy Alta Complejidad',
-    badgeClass: 'badge-complexity-muy_alta',
-    icon: 'alert-triangle',
-    estimateHelp: 'Crítico / Extenso (> 3 meses)'
+  por_iniciar: {
+    label: 'Por iniciar',
+    className: 'badge-status-por_iniciar'
   }
 };
 
-// Status dictionary
-const STATUS_CONFIG = {
-  planificado: { label: 'Planificado', class: 'status-planificado', icon: 'clipboard-list' },
-  en_progreso: { label: 'En Progreso', class: 'status-en_progreso', icon: 'zap' },
-  en_revision: { label: 'En Revisión', class: 'status-en_revision', icon: 'eye' },
-  completado: { label: 'Completado', class: 'status-completado', icon: 'check-circle' },
-  pausado: { label: 'En Pausa', class: 'status-pausado', icon: 'pause-circle' }
-};
-
-// Priority dictionary
-const PRIORITY_CONFIG = {
-  baja: { label: 'Baja', class: 'text-slate-400 bg-slate-800 border-slate-700' },
-  media: { label: 'Media', class: 'text-sky-400 bg-sky-950/40 border-sky-800/40' },
-  alta: { label: 'Alta', class: 'text-amber-400 bg-amber-950/40 border-amber-800/40' },
-  urgente: { label: 'Urgente', class: 'text-rose-400 bg-rose-950/40 border-rose-800/40' }
+const COMPLEXITY_LABELS = {
+  baja: '🟢 Baja',
+  media: '🔵 Media',
+  alta: '🟠 Alta',
+  muy_alta: '🔴 Muy Alta'
 };
 
 // ==========================================
@@ -73,13 +89,20 @@ function loadProjects() {
     try {
       projects = JSON.parse(saved);
     } catch (e) {
-      console.error('Error reading localStorage', e);
-      projects = [];
+      console.error('Error loading projects', e);
+      projects = JSON.parse(JSON.stringify(INITIAL_PROJECTS));
       saveProjects();
     }
   } else {
-    projects = [];
+    // Start with the template matching the screenshot
+    projects = JSON.parse(JSON.stringify(INITIAL_PROJECTS));
     saveProjects();
+  }
+
+  if (projects.length > 0) {
+    activeProjectId = projects[0].id;
+  } else {
+    activeProjectId = null;
   }
 }
 
@@ -87,410 +110,532 @@ function saveProjects() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
 }
 
+function getActiveProject() {
+  if (!activeProjectId) return null;
+  return projects.find(p => p.id === activeProjectId) || null;
+}
+
 // ==========================================
 // EVENT LISTENERS
 // ==========================================
 function initEventListeners() {
-  // Modal buttons
-  document.getElementById('btnOpenNewProjectModal').addEventListener('click', () => openProjectModal());
+  // Project selector change
+  const projectSelector = document.getElementById('projectSelector');
+  projectSelector.addEventListener('change', (e) => {
+    activeProjectId = e.target.value;
+    renderApp();
+  });
+
+  // Top header button
+  document.getElementById('btnOpenNewProjectModal').addEventListener('click', () => openProjectModal(null));
+  document.getElementById('btnExportData').addEventListener('click', exportDataJSON);
+
+  // Project Toolbar Buttons
+  document.getElementById('btnOpenAddActivityModal').addEventListener('click', () => openActivityModal(null));
+  document.getElementById('btnOpenSeguimientoModal').addEventListener('click', openSeguimientoModal);
+  document.getElementById('btnOpenResumenModal').addEventListener('click', openResumenModal);
+  document.getElementById('btnOpenEditProjectModal').addEventListener('click', () => {
+    const current = getActiveProject();
+    if (current) openProjectModal(current.id);
+  });
+  document.getElementById('btnDeleteCurrentProject').addEventListener('click', deleteCurrentProject);
+
+  // Modals close buttons
+  document.getElementById('btnCloseActivityModal').addEventListener('click', closeActivityModal);
+  document.getElementById('btnCancelActivityModal').addEventListener('click', closeActivityModal);
+  document.getElementById('activityForm').addEventListener('submit', handleActivityFormSubmit);
+
+  document.getElementById('formActivityProgress').addEventListener('input', (e) => {
+    document.getElementById('formActivityProgressDisplay').textContent = `${e.target.value}%`;
+  });
+
   document.getElementById('btnCloseProjectModal').addEventListener('click', closeProjectModal);
-  document.getElementById('btnCancelModal').addEventListener('click', closeProjectModal);
+  document.getElementById('btnCancelProjectModal').addEventListener('click', closeProjectModal);
   document.getElementById('projectForm').addEventListener('submit', handleProjectFormSubmit);
 
-  // Milestone field generator in modal
-  document.getElementById('btnAddMilestoneField').addEventListener('click', () => addMilestoneField());
+  document.getElementById('btnCloseResumenModal').addEventListener('click', closeResumenModal);
+  document.getElementById('btnCloseResumenModalBottom').addEventListener('click', closeResumenModal);
 
-  // Revision modal
-  document.getElementById('btnCloseRevisionModal').addEventListener('click', closeRevisionModal);
-  document.getElementById('btnCancelRevisionModal').addEventListener('click', closeRevisionModal);
-  document.getElementById('revisionForm').addEventListener('submit', handleRevisionFormSubmit);
-
-  const revisionSlider = document.getElementById('revisionProgressSlider');
-  revisionSlider.addEventListener('input', (e) => {
-    document.getElementById('revisionProgressLabel').textContent = `${e.target.value}%`;
-  });
-
-  // Filters & Search
-  document.getElementById('searchInput').addEventListener('input', renderApp);
-  document.getElementById('filterStatus').addEventListener('change', renderApp);
-  document.getElementById('filterComplexity').addEventListener('change', renderApp);
-  document.getElementById('sortBy').addEventListener('change', renderApp);
-
-  // Layout view switcher
-  document.getElementById('viewGridBtn').addEventListener('click', () => setLayout('grid'));
-  document.getElementById('viewListBtn').addEventListener('click', () => setLayout('list'));
-
-  // Header actions
-  const exportBtn = document.getElementById('btnExportData');
-  if (exportBtn) {
-    exportBtn.addEventListener('click', exportDataJSON);
-  }
-}
-
-function setLayout(mode) {
-  currentLayout = mode;
-  const gridBtn = document.getElementById('viewGridBtn');
-  const listBtn = document.getElementById('viewListBtn');
-  const container = document.getElementById('projectsContainer');
-
-  if (mode === 'grid') {
-    gridBtn.className = 'p-1.5 rounded-lg bg-slate-800 text-brand-400';
-    listBtn.className = 'p-1.5 rounded-lg text-slate-400 hover:text-slate-200';
-    container.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
-  } else {
-    listBtn.className = 'p-1.5 rounded-lg bg-slate-800 text-brand-400';
-    gridBtn.className = 'p-1.5 rounded-lg text-slate-400 hover:text-slate-200';
-    container.className = 'flex flex-col space-y-4';
-  }
+  document.getElementById('btnCloseSeguimientoModal').addEventListener('click', closeSeguimientoModal);
+  document.getElementById('btnCloseSeguimientoModalBottom').addEventListener('click', closeSeguimientoModal);
+  document.getElementById('newReviewForm').addEventListener('submit', handleAddReviewSubmit);
 }
 
 // ==========================================
-// RENDER & FILTER ENGINE
+// RENDER ENGINE
 // ==========================================
 function renderApp() {
-  updateMetrics();
+  updateProjectSelector();
 
-  const searchQuery = document.getElementById('searchInput').value.trim().toLowerCase();
-  const filterStatus = document.getElementById('filterStatus').value;
-  const filterComplexity = document.getElementById('filterComplexity').value;
-  const sortBy = document.getElementById('sortBy').value;
+  const currentProject = getActiveProject();
+  const projectSection = document.getElementById('projectSection');
+  const welcomeSection = document.getElementById('welcomeNoProjectSection');
 
-  // Filter projects
-  let filtered = projects.filter(proj => {
-    const matchesSearch = 
-      proj.title.toLowerCase().includes(searchQuery) ||
-      proj.description.toLowerCase().includes(searchQuery) ||
-      (proj.category && proj.category.toLowerCase().includes(searchQuery));
-
-    const matchesStatus = (filterStatus === 'ALL') || (proj.status === filterStatus);
-    const matchesComplexity = (filterComplexity === 'ALL') || (proj.complexity === filterComplexity);
-
-    return matchesSearch && matchesStatus && matchesComplexity;
-  });
-
-  // Sort projects
-  filtered.sort((a, b) => {
-    if (sortBy === 'progress_asc') return a.progress - b.progress;
-    if (sortBy === 'progress_desc') return b.progress - a.progress;
-    if (sortBy === 'time_desc') return b.estimatedHours - a.estimatedHours;
-    if (sortBy === 'complexity_desc') {
-      const weights = { muy_alta: 4, alta: 3, media: 2, baja: 1 };
-      return (weights[b.complexity] || 0) - (weights[a.complexity] || 0);
-    }
-    // Default 'updated'
-    return new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0);
-  });
-
-  const container = document.getElementById('projectsContainer');
-  const emptyState = document.getElementById('emptyState');
-
-  if (filtered.length === 0) {
-    container.innerHTML = '';
-    emptyState.classList.remove('hidden');
-  } else {
-    emptyState.classList.add('hidden');
-    container.innerHTML = filtered.map(proj => renderProjectCard(proj)).join('');
+  if (!currentProject) {
+    projectSection.classList.add('hidden');
+    welcomeSection.classList.remove('hidden');
+    document.getElementById('activeProjectSummary').textContent = 'No hay proyectos creados aún';
+    return;
   }
 
-  // Refresh icons
+  welcomeSection.classList.add('hidden');
+  projectSection.classList.remove('hidden');
+
+  // Update summary in header
+  const compLabel = COMPLEXITY_LABELS[currentProject.complexity] || 'Media';
+  const hours = currentProject.estimatedHours ? `${currentProject.estimatedHours}h est.` : 'Horas no esp.';
+  const freq = currentProject.revisionFrequency || 'Semanal';
+  const overallProgress = calculateProjectProgress(currentProject);
+
+  document.getElementById('activeProjectSummary').innerHTML = `
+    Complejidad: <span class="text-white font-medium">${compLabel}</span> | 
+    Revisión: <span class="text-white font-medium">${freq}</span> | 
+    Tiempos: <span class="text-white font-medium">${hours}</span> | 
+    Avance: <span class="text-cyan-400 font-bold">${overallProgress}%</span>
+  `;
+
+  // Render activities
+  renderActivities(currentProject);
+
+  // Reinitialize icons
   lucide.createIcons();
 }
 
-function updateMetrics() {
-  const total = projects.length;
-  const inProgress = projects.filter(p => p.status === 'en_progreso' || p.status === 'en_revision').length;
-  const completed = projects.filter(p => p.status === 'completado').length;
+function updateProjectSelector() {
+  const selector = document.getElementById('projectSelector');
+  selector.innerHTML = '';
 
-  const totalEstHours = projects.reduce((acc, p) => acc + (Number(p.estimatedHours) || 0), 0);
-  const totalSpentHours = projects.reduce((acc, p) => acc + (Number(p.spentHours) || 0), 0);
+  if (projects.length === 0) {
+    selector.innerHTML = '<option value="">Sin proyectos</option>';
+    return;
+  }
 
-  const avgProgress = total > 0 ? Math.round(projects.reduce((acc, p) => acc + (Number(p.progress) || 0), 0) / total) : 0;
-
-  let totalPendingMilestones = 0;
-  let totalCompletedMilestones = 0;
   projects.forEach(p => {
-    if (p.milestones && p.milestones.length) {
-      p.milestones.forEach(m => {
-        if (m.completed) totalCompletedMilestones++;
-        else totalPendingMilestones++;
-      });
+    const option = document.createElement('option');
+    option.value = p.id;
+    option.textContent = p.title;
+    if (p.id === activeProjectId) {
+      option.selected = true;
     }
+    selector.appendChild(option);
+  });
+}
+
+function calculateProjectProgress(project) {
+  if (!project.activities || project.activities.length === 0) return 0;
+  const total = project.activities.reduce((acc, act) => acc + (Number(act.progress) || 0), 0);
+  return Math.round(total / project.activities.length);
+}
+
+// ==========================================
+// RENDER ACTIVITIES (SCREENSHOT ALIGNED)
+// ==========================================
+function renderActivities(project) {
+  const container = document.getElementById('activitiesContainer');
+  const noNotice = document.getElementById('noActivitiesNotice');
+
+  const activities = project.activities || [];
+
+  if (activities.length === 0) {
+    container.innerHTML = '';
+    noNotice.classList.remove('hidden');
+    return;
+  }
+
+  noNotice.classList.add('hidden');
+
+  container.innerHTML = activities.map(act => {
+    const statusCfg = STATUS_CONFIG[act.status] || STATUS_CONFIG.ejecucion;
+    const notesCount = act.notes ? act.notes.length : 0;
+    const dueDateText = act.dueDate ? `Vence ${act.dueDate}` : 'Sin fecha';
+    const roleText = act.role || 'Responsable';
+
+    return `
+      <div class="relative group" id="activity-wrapper-${act.id}">
+        
+        <!-- Branch connector curve to left timeline -->
+        <div class="branch-connector"></div>
+
+        <!-- Main Activity Card (Light background matching screenshot) -->
+        <div class="activity-card bg-activityBg rounded-xl p-3 sm:p-3.5 shadow-md border border-slate-200/80 flex flex-col md:flex-row md:items-center justify-between gap-3 text-activityText">
+          
+          <!-- Left info section -->
+          <div class="flex items-start gap-2.5 flex-1 min-w-0">
+            <!-- Corner arrow icon ↳ -->
+            <div class="text-cyanAction mt-0.5 text-lg font-black leading-none select-none">
+              ↳
+            </div>
+            
+            <div class="min-w-0 flex-1">
+              <h3 class="text-sm sm:text-base font-extrabold text-activityText tracking-tight truncate leading-snug">
+                ${escapeHtml(act.title)}
+              </h3>
+              
+              <!-- Subtitle metadata -->
+              <div class="flex items-center gap-1.5 flex-wrap text-xs text-slate-500 font-medium mt-0.5">
+                <span>${escapeHtml(roleText)}</span>
+                <span>·</span>
+                <span>${dueDateText}</span>
+                <span>·</span>
+                <!-- Status Badge -->
+                <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full ${statusCfg.className}">
+                  ${statusCfg.label}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right controls section (Progress, Slider, Notes, Edit, Delete) -->
+          <div class="flex items-center gap-2 sm:gap-3 justify-end flex-wrap">
+            
+            <!-- Percentage Display -->
+            <span class="text-xs sm:text-sm font-black text-activityText min-w-[34px] text-right" id="progress-val-${act.id}">
+              ${act.progress}%
+            </span>
+
+            <!-- Mini Progress Bar -->
+            <div class="w-12 sm:w-16 bg-slate-300/80 h-2 rounded-full overflow-hidden">
+              <div 
+                id="mini-bar-${act.id}"
+                class="h-2 rounded-full transition-all duration-150 ${getProgressFill(act.progress)}" 
+                style="width: ${act.progress}%"
+              ></div>
+            </div>
+
+            <!-- Interactive Slider (Drag to adjust %) -->
+            <input 
+              type="range" 
+              min="0" 
+              max="100" 
+              value="${act.progress}" 
+              class="activity-slider"
+              oninput="handleSliderChange('${act.id}', this.value)"
+              title="Desliza para ajustar el progreso en vivo"
+            >
+
+            <!-- Notas (X) ▾ Dropdown Toggle -->
+            <button 
+              onclick="toggleNotesDrawer('${act.id}')" 
+              class="px-2.5 py-1.5 bg-navyButton hover:bg-navyButtonHover text-white text-xs font-semibold rounded-lg flex items-center gap-1 shadow-sm transition"
+              title="Ver o agregar notas y revisiones"
+            >
+              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+              <span>Notas (${notesCount})</span>
+              <i data-lucide="chevron-down" class="w-3 h-3 ml-0.5 transition-transform" id="caret-${act.id}"></i>
+            </button>
+
+            <!-- Editar Button -->
+            <button 
+              onclick="openActivityModal('${act.id}')" 
+              class="px-3 py-1.5 bg-navyButton hover:bg-navyButtonHover text-white text-xs font-semibold rounded-lg shadow-sm transition"
+            >
+              Editar
+            </button>
+
+            <!-- Quitar Button -->
+            <button 
+              onclick="deleteActivity('${act.id}')" 
+              class="px-3 py-1.5 bg-navyButton hover:bg-rose-900 text-slate-200 hover:text-white text-xs font-semibold rounded-lg shadow-sm transition"
+            >
+              Quitar
+            </button>
+          </div>
+        </div>
+
+        <!-- Inline Notes & Revision Drawer (Expandable) -->
+        <div id="notes-drawer-${act.id}" class="hidden mt-2 ml-4 p-3.5 bg-navyCard border border-navyBorder rounded-xl shadow-lg animate-fadeIn text-xs text-slate-200">
+          <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-navyBorder">
+            <span class="font-bold text-cyan-400 flex items-center gap-1">
+              <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
+              Notas de Revisión y Observaciones
+            </span>
+            <span class="text-[10px] text-slate-400">Actividad: ${escapeHtml(act.title)}</span>
+          </div>
+
+          <!-- Existing notes list -->
+          <div class="space-y-1.5 mb-3 max-h-36 overflow-y-auto" id="notes-list-${act.id}">
+            ${renderActivityNotesList(act)}
+          </div>
+
+          <!-- Quick Note Form -->
+          <div class="flex gap-2">
+            <input 
+              type="text" 
+              id="new-note-input-${act.id}" 
+              placeholder="Escribe una observación o avance..." 
+              class="flex-1 bg-navyBg border border-navyBorder text-slate-100 text-xs rounded-lg px-3 py-1.5 focus:ring-1 focus:ring-cyan-400 focus:outline-none"
+              onkeydown="if(event.key==='Enter'){ addActivityNote('${act.id}'); }"
+            >
+            <button 
+              type="button" 
+              onclick="addActivityNote('${act.id}')" 
+              class="px-3 py-1.5 bg-cyanAction hover:bg-cyanActionHover text-white font-bold text-xs rounded-lg transition"
+            >
+              Agregar
+            </button>
+          </div>
+        </div>
+
+      </div>
+    `;
+  }).join('');
+}
+
+function getProgressFill(pct) {
+  if (pct >= 100) return 'bg-emerald-500';
+  if (pct >= 50) return 'bg-gradient-to-r from-cyan-500 to-emerald-400';
+  if (pct > 0) return 'bg-cyan-500';
+  return 'bg-slate-400';
+}
+
+function renderActivityNotesList(act) {
+  if (!act.notes || act.notes.length === 0) {
+    return '<p class="text-[11px] text-slate-400 italic">No hay notas registradas para esta actividad.</p>';
+  }
+  return act.notes.map(n => `
+    <div class="bg-navyBg/80 p-2 rounded-lg border border-navyBorder/80 flex items-start justify-between gap-2">
+      <div class="min-w-0 flex-1">
+        <p class="text-xs text-slate-200">${escapeHtml(n.text)}</p>
+        <span class="text-[10px] text-slate-400 mt-0.5 block">${n.date}</span>
+      </div>
+      <button onclick="deleteActivityNote('${act.id}', '${n.id}')" title="Eliminar nota" class="text-slate-500 hover:text-rose-400 p-0.5">
+        <i data-lucide="trash" class="w-3 h-3"></i>
+      </button>
+    </div>
+  `).join('');
+}
+
+// ==========================================
+// INTERACTIVE SLIDER LOGIC
+// ==========================================
+function handleSliderChange(activityId, value) {
+  const current = getActiveProject();
+  if (!current) return;
+
+  const activity = current.activities.find(a => a.id === activityId);
+  if (!activity) return;
+
+  const numVal = Number(value);
+  activity.progress = numVal;
+
+  // Auto-update status if reached 100%
+  if (numVal === 100) {
+    activity.status = 'completado';
+  } else if (activity.status === 'completado' && numVal < 100) {
+    activity.status = 'ejecucion';
+  } else if (activity.status === 'por_iniciar' && numVal > 0) {
+    activity.status = 'ejecucion';
+  }
+
+  // Update UI values instantly without full re-render for smooth 60fps drag
+  const displayVal = document.getElementById(`progress-val-${activityId}`);
+  if (displayVal) displayVal.textContent = `${numVal}%`;
+
+  const miniBar = document.getElementById(`mini-bar-${activityId}`);
+  if (miniBar) {
+    miniBar.style.width = `${numVal}%`;
+    miniBar.className = `h-2 rounded-full transition-all duration-150 ${getProgressFill(numVal)}`;
+  }
+
+  // Update overall project progress in header
+  const overall = calculateProjectProgress(current);
+  const summaryEl = document.getElementById('activeProjectSummary');
+  if (summaryEl) {
+    const compLabel = COMPLEXITY_LABELS[current.complexity] || 'Media';
+    const hours = current.estimatedHours ? `${current.estimatedHours}h est.` : 'Horas no esp.';
+    const freq = current.revisionFrequency || 'Semanal';
+    summaryEl.innerHTML = `
+      Complejidad: <span class="text-white font-medium">${compLabel}</span> | 
+      Revisión: <span class="text-white font-medium">${freq}</span> | 
+      Tiempos: <span class="text-white font-medium">${hours}</span> | 
+      Avance: <span class="text-cyan-400 font-bold">${overall}%</span>
+    `;
+  }
+
+  saveProjects();
+}
+
+// ==========================================
+// NOTES DRAWER ACTIONS
+// ==========================================
+function toggleNotesDrawer(activityId) {
+  const drawer = document.getElementById(`notes-drawer-${activityId}`);
+  const caret = document.getElementById(`caret-${activityId}`);
+  if (!drawer) return;
+
+  if (drawer.classList.contains('hidden')) {
+    drawer.classList.remove('hidden');
+    if (caret) caret.classList.add('rotate-180');
+  } else {
+    drawer.classList.add('hidden');
+    if (caret) caret.classList.remove('rotate-180');
+  }
+}
+
+function addActivityNote(activityId) {
+  const input = document.getElementById(`new-note-input-${activityId}`);
+  if (!input) return;
+
+  const text = input.value.trim();
+  if (!text) return;
+
+  const current = getActiveProject();
+  if (!current) return;
+
+  const activity = current.activities.find(a => a.id === activityId);
+  if (!activity) return;
+
+  if (!activity.notes) activity.notes = [];
+
+  activity.notes.push({
+    id: `note-${Date.now()}`,
+    date: new Date().toISOString().slice(0, 10),
+    text
   });
 
-  // Update UI Elements
-  document.getElementById('statTotalProjects').textContent = total;
-  document.getElementById('statActiveBreakdown').textContent = `${inProgress} activos`;
-  document.getElementById('statCompletedCount').textContent = `${completed} finalizados`;
+  input.value = '';
+  saveProjects();
+  renderApp();
+  showToast('Nota registrada');
 
-  document.getElementById('statAverageProgress').textContent = `${avgProgress}%`;
-  document.getElementById('statProgressBar').style.width = `${avgProgress}%`;
+  // Keep drawer open
+  setTimeout(() => {
+    const drawer = document.getElementById(`notes-drawer-${activityId}`);
+    if (drawer) drawer.classList.remove('hidden');
+  }, 10);
+}
 
-  document.getElementById('statTotalEstimatedHours').textContent = `${totalEstHours}h`;
-  document.getElementById('statTotalSpentHours').textContent = `${totalSpentHours}h`;
+function deleteActivityNote(activityId, noteId) {
+  const current = getActiveProject();
+  if (!current) return;
 
-  document.getElementById('statPendingReviews').textContent = totalPendingMilestones;
-  document.getElementById('statCompletedReviews').textContent = totalCompletedMilestones;
+  const activity = current.activities.find(a => a.id === activityId);
+  if (!activity || !activity.notes) return;
+
+  activity.notes = activity.notes.filter(n => n.id !== noteId);
+  saveProjects();
+  renderApp();
+  showToast('Nota eliminada');
+
+  setTimeout(() => {
+    const drawer = document.getElementById(`notes-drawer-${activityId}`);
+    if (drawer) drawer.classList.remove('hidden');
+  }, 10);
 }
 
 // ==========================================
-// PROJECT CARD TEMPLATE
+// MODAL: ADD / EDIT ACTIVITY
 // ==========================================
-function renderProjectCard(project) {
-  const comp = COMPLEXITY_CONFIG[project.complexity] || COMPLEXITY_CONFIG.media;
-  const stat = STATUS_CONFIG[project.status] || STATUS_CONFIG.planificado;
-  const prio = PRIORITY_CONFIG[project.priority] || PRIORITY_CONFIG.media;
+function openActivityModal(activityId = null) {
+  const modal = document.getElementById('activityModal');
+  const titleEl = document.getElementById('activityModalTitle');
+  const subEl = document.getElementById('activityModalSubtitle');
+  const form = document.getElementById('activityForm');
 
-  // Calculate milestone progress
-  const milestones = project.milestones || [];
-  const completedMilestones = milestones.filter(m => m.completed).length;
-  const totalMilestones = milestones.length;
+  const current = getActiveProject();
+  if (!current) {
+    alert('Primero crea o selecciona un proyecto');
+    return;
+  }
 
-  // Format date
-  const targetDateFormatted = project.targetDate 
-    ? new Date(project.targetDate).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })
-    : 'Sin fecha fija';
+  if (activityId) {
+    const act = current.activities.find(a => a.id === activityId);
+    if (!act) return;
 
-  // Last review info
-  const reviews = project.reviews || [];
-  const lastReview = reviews.length > 0 ? reviews[reviews.length - 1] : null;
-
-  return `
-    <div class="project-card bg-cardBg border border-cardBorder rounded-2xl p-5 shadow-sm hover:border-slate-700 flex flex-col justify-between" id="card-${project.id}">
-      
-      <!-- Card Top: Tags & Actions -->
-      <div>
-        <div class="flex items-center justify-between gap-2 mb-3">
-          <div class="flex items-center gap-1.5 flex-wrap">
-            <span class="text-xs px-2.5 py-1 rounded-lg ${stat.class} font-semibold flex items-center gap-1">
-              <i data-lucide="${stat.icon}" class="w-3.5 h-3.5"></i>
-              ${stat.label}
-            </span>
-            <span class="text-xs px-2 py-0.5 rounded-lg border font-medium ${prio.class}">
-              Prioridad ${prio.label}
-            </span>
-          </div>
-
-          <!-- Quick Actions Menu -->
-          <div class="flex items-center space-x-1">
-            <button onclick="openProjectModal('${project.id}')" title="Editar proyecto" class="p-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-lg transition">
-              <i data-lucide="edit-3" class="w-4 h-4"></i>
-            </button>
-            <button onclick="deleteProject('${project.id}')" title="Eliminar proyecto" class="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition">
-              <i data-lucide="trash-2" class="w-4 h-4"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- Category & Title -->
-        <div class="mb-1">
-          <span class="text-[11px] font-semibold text-brand-400 tracking-wider uppercase">${escapeHtml(project.category || 'General')}</span>
-          <h3 class="text-base font-bold text-white tracking-tight leading-snug hover:text-brand-300 transition cursor-pointer" onclick="openProjectModal('${project.id}')">
-            ${escapeHtml(project.title)}
-          </h3>
-        </div>
-
-        <!-- Description -->
-        <p class="text-xs text-slate-400 line-clamp-2 mb-4">
-          ${escapeHtml(project.description || 'Sin descripción detallada.')}
-        </p>
-
-        <!-- COMPLEXITY & TIME DETAILS BADGES -->
-        <div class="grid grid-cols-2 gap-2 p-3 bg-slate-900/60 rounded-xl border border-slate-800/80 mb-4 text-xs">
-          <!-- Complexity -->
-          <div>
-            <span class="text-[10px] text-slate-500 uppercase block font-semibold">Complejidad</span>
-            <span class="inline-flex items-center gap-1 font-semibold px-2 py-0.5 mt-0.5 rounded-md ${comp.badgeClass}">
-              <i data-lucide="${comp.icon}" class="w-3 h-3"></i>
-              ${comp.label.replace('Complejidad ', '')}
-            </span>
-          </div>
-
-          <!-- Time Estimate & Spent -->
-          <div>
-            <span class="text-[10px] text-slate-500 uppercase block font-semibold">Tiempo Estimado</span>
-            <div class="flex items-center gap-1.5 mt-0.5 font-bold text-slate-200">
-              <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-400"></i>
-              <span>${project.estimatedHours}h est.</span>
-              <span class="text-[11px] font-normal text-slate-400">(${project.spentHours || 0}h dedicadas)</span>
-            </div>
-          </div>
-
-          <!-- Review Frequency -->
-          <div>
-            <span class="text-[10px] text-slate-500 uppercase block font-semibold">Revisión cada</span>
-            <div class="flex items-center gap-1 text-slate-300 font-medium mt-0.5">
-              <i data-lucide="repeat" class="w-3 h-3 text-indigo-400"></i>
-              <span>${escapeHtml(project.revisionFrequency || 'Semanal')}</span>
-            </div>
-          </div>
-
-          <!-- Target Date -->
-          <div>
-            <span class="text-[10px] text-slate-500 uppercase block font-semibold">Fecha Objetivo</span>
-            <div class="flex items-center gap-1 text-slate-300 font-medium mt-0.5">
-              <i data-lucide="calendar" class="w-3 h-3 text-emerald-400"></i>
-              <span>${targetDateFormatted}</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- PROGRESS BAR -->
-        <div class="mb-4">
-          <div class="flex items-center justify-between text-xs mb-1.5">
-            <span class="font-semibold text-slate-300 flex items-center gap-1">
-              <span>Progreso de Avance</span>
-            </span>
-            <span class="font-extrabold text-brand-400">${project.progress}%</span>
-          </div>
-          <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
-            <div 
-              class="h-2 rounded-full transition-all duration-300 ${getProgressGradient(project.progress)}" 
-              style="width: ${project.progress}%"
-            ></div>
-          </div>
-        </div>
-
-        <!-- MILESTONES / HITOS CHECKLIST -->
-        <div class="mb-4">
-          <div class="flex items-center justify-between text-xs text-slate-400 mb-2 font-medium">
-            <span class="flex items-center gap-1">
-              <i data-lucide="check-square" class="w-3.5 h-3.5 text-brand-400"></i>
-              Hitos de Revisión (${completedMilestones}/${totalMilestones})
-            </span>
-            <button onclick="toggleMilestonesExpand('${project.id}')" class="text-[11px] text-brand-400 hover:underline">
-              Ver lista
-            </button>
-          </div>
-
-          <div id="milestones-list-${project.id}" class="space-y-1.5 bg-slate-900/40 p-2.5 rounded-xl border border-slate-800/60 max-h-32 overflow-y-auto">
-            ${milestones.length === 0 ? '<p class="text-xs text-slate-500 italic">No hay hitos programados aún.</p>' : ''}
-            ${milestones.map(m => `
-              <label class="flex items-start gap-2 text-xs text-slate-300 cursor-pointer hover:text-white select-none">
-                <input 
-                  type="checkbox" 
-                  ${m.completed ? 'checked' : ''} 
-                  onchange="toggleMilestoneCheck('${project.id}', '${m.id}')"
-                  class="mt-0.5 rounded border-slate-700 bg-slate-800 text-brand-600 focus:ring-0 focus:ring-offset-0 cursor-pointer"
-                >
-                <span class="${m.completed ? 'line-through text-slate-500' : ''}">${escapeHtml(m.title)}</span>
-              </label>
-            `).join('')}
-          </div>
-        </div>
-
-        <!-- RECENT REVIEWS SUMMARY (EXPANDABLE) -->
-        ${lastReview ? `
-          <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 text-xs mb-4">
-            <div class="flex items-center justify-between text-slate-400 mb-1">
-              <span class="font-semibold text-emerald-400 flex items-center gap-1 text-[11px]">
-                <i data-lucide="check-circle-2" class="w-3 h-3"></i> Última Revisión
-              </span>
-              <span class="text-[10px] text-slate-500">${lastReview.date} (${lastReview.hours}h)</span>
-            </div>
-            <p class="text-slate-300 text-xs font-medium">${escapeHtml(lastReview.title)}</p>
-            ${lastReview.notes ? `<p class="text-slate-400 text-[11px] mt-0.5 italic">"${escapeHtml(lastReview.notes)}"</p>` : ''}
-          </div>
-        ` : ''}
-      </div>
-
-      <!-- Card Bottom Actions -->
-      <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2">
-        <button 
-          onclick="openRevisionModal('${project.id}')" 
-          class="flex-1 py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 hover:text-white transition flex items-center justify-center gap-1.5"
-        >
-          <i data-lucide="plus-circle" class="w-3.5 h-3.5 text-emerald-400"></i>
-          <span>+ Registrar Revisión</span>
-        </button>
-
-        <button 
-          onclick="quickAdvanceProgress('${project.id}')" 
-          title="Avanzar +10% de progreso rápido"
-          class="p-2 rounded-xl bg-slate-800 hover:bg-brand-600/30 text-slate-300 hover:text-brand-300 transition text-xs font-bold"
-        >
-          +10%
-        </button>
-      </div>
-
-    </div>
-  `;
-}
-
-function getProgressGradient(pct) {
-  if (pct >= 100) return 'bg-emerald-500';
-  if (pct >= 60) return 'bg-gradient-to-r from-brand-500 to-emerald-400';
-  if (pct >= 25) return 'bg-gradient-to-r from-amber-500 to-indigo-500';
-  return 'bg-gradient-to-r from-rose-500 to-amber-500';
-}
-
-// ==========================================
-// ACTIONS: TOGGLES & QUICK UPDATES
-// ==========================================
-function toggleMilestonesExpand(projectId) {
-  const container = document.getElementById(`milestones-list-${projectId}`);
-  if (!container) return;
-  if (container.classList.contains('max-h-32')) {
-    container.classList.remove('max-h-32');
-    container.classList.add('max-h-96');
+    titleEl.textContent = 'Editar actividad';
+    subEl.textContent = `Modificando: ${act.title}`;
+    document.getElementById('formActivityId').value = act.id;
+    document.getElementById('formActivityTitle').value = act.title;
+    document.getElementById('formActivityRole').value = act.role || '';
+    document.getElementById('formActivityDueDate').value = act.dueDate || '';
+    document.getElementById('formActivityStatus').value = act.status || 'ejecucion';
+    document.getElementById('formActivityProgress').value = act.progress || 0;
+    document.getElementById('formActivityProgressDisplay').textContent = `${act.progress || 0}%`;
+    document.getElementById('formActivityNote').value = '';
   } else {
-    container.classList.add('max-h-32');
-    container.classList.remove('max-h-96');
+    titleEl.textContent = 'Agregar actividad';
+    subEl.textContent = `Proyecto: ${current.title}`;
+    form.reset();
+    document.getElementById('formActivityId').value = '';
+    document.getElementById('formActivityStatus').value = 'ejecucion';
+    document.getElementById('formActivityProgress').value = 0;
+    document.getElementById('formActivityProgressDisplay').textContent = '0%';
   }
+
+  modal.classList.remove('hidden');
+  lucide.createIcons();
 }
 
-function toggleMilestoneCheck(projectId, milestoneId) {
-  const proj = projects.find(p => p.id === projectId);
-  if (!proj) return;
+function closeActivityModal() {
+  document.getElementById('activityModal').classList.add('hidden');
+}
 
-  const milestone = proj.milestones.find(m => m.id === milestoneId);
-  if (!milestone) return;
+function handleActivityFormSubmit(e) {
+  e.preventDefault();
 
-  milestone.completed = !milestone.completed;
-  proj.updatedAt = new Date().toISOString();
+  const current = getActiveProject();
+  if (!current) return;
 
-  // Auto-calculate progress based on completed milestones
-  const total = proj.milestones.length;
-  if (total > 0) {
-    const completedCount = proj.milestones.filter(m => m.completed).length;
-    proj.progress = Math.round((completedCount / total) * 100);
-    if (proj.progress === 100) {
-      proj.status = 'completado';
-    } else if (proj.status === 'planificado') {
-      proj.status = 'en_progreso';
+  const id = document.getElementById('formActivityId').value;
+  const title = document.getElementById('formActivityTitle').value.trim();
+  const role = document.getElementById('formActivityRole').value.trim() || 'Responsable';
+  const dueDate = document.getElementById('formActivityDueDate').value;
+  const status = document.getElementById('formActivityStatus').value;
+  const progress = Number(document.getElementById('formActivityProgress').value) || 0;
+  const noteText = document.getElementById('formActivityNote').value.trim();
+
+  if (id) {
+    // Edit existing activity
+    const act = current.activities.find(a => a.id === id);
+    if (act) {
+      act.title = title;
+      act.role = role;
+      act.dueDate = dueDate;
+      act.status = status;
+      act.progress = progress;
+      if (noteText) {
+        if (!act.notes) act.notes = [];
+        act.notes.push({
+          id: `n-${Date.now()}`,
+          date: new Date().toISOString().slice(0, 10),
+          text: noteText
+        });
+      }
     }
+    showToast('Actividad actualizada');
+  } else {
+    // Add new activity
+    const newAct = {
+      id: `act-${Date.now()}`,
+      title,
+      role,
+      dueDate,
+      status,
+      progress,
+      notes: noteText ? [{ id: `n-${Date.now()}`, date: new Date().toISOString().slice(0, 10), text: noteText }] : []
+    };
+    if (!current.activities) current.activities = [];
+    current.activities.push(newAct);
+    showToast('Actividad agregada con éxito');
   }
 
   saveProjects();
+  closeActivityModal();
   renderApp();
-  showToast(`Hito actualizado: ${milestone.completed ? 'Completado' : 'Pendiente'}`);
 }
 
-function quickAdvanceProgress(projectId) {
-  const proj = projects.find(p => p.id === projectId);
-  if (!proj) return;
+function deleteActivity(activityId) {
+  const current = getActiveProject();
+  if (!current) return;
 
-  proj.progress = Math.min(100, (Number(proj.progress) || 0) + 10);
-  if (proj.progress === 100) {
-    proj.status = 'completado';
-  } else if (proj.status === 'planificado') {
-    proj.status = 'en_progreso';
-  }
-  proj.updatedAt = new Date().toISOString();
+  const act = current.activities.find(a => a.id === activityId);
+  if (!act) return;
 
-  saveProjects();
-  renderApp();
-  showToast(`Progreso de "${proj.title}" actualizado al ${proj.progress}%`);
-}
-
-function deleteProject(projectId) {
-  const proj = projects.find(p => p.id === projectId);
-  if (!proj) return;
-
-  if (confirm(`¿Estás seguro de eliminar el proyecto "${proj.title}"?`)) {
-    projects = projects.filter(p => p.id !== projectId);
+  if (confirm(`¿Deseas quitar la actividad "${act.title}"?`)) {
+    current.activities = current.activities.filter(a => a.id !== activityId);
     saveProjects();
     renderApp();
-    showToast('Proyecto eliminado');
+    showToast('Actividad eliminada');
   }
 }
 
@@ -499,47 +644,28 @@ function deleteProject(projectId) {
 // ==========================================
 function openProjectModal(projectId = null) {
   const modal = document.getElementById('projectModal');
-  const modalTitle = document.getElementById('modalTitle');
+  const titleEl = document.getElementById('projectModalTitle');
   const form = document.getElementById('projectForm');
-  const milestonesContainer = document.getElementById('milestonesContainer');
-
-  milestonesContainer.innerHTML = '';
 
   if (projectId) {
     const proj = projects.find(p => p.id === projectId);
     if (!proj) return;
 
-    modalTitle.textContent = 'Editar Proyecto';
+    titleEl.textContent = 'Editar Proyecto';
     document.getElementById('formProjectId').value = proj.id;
-    document.getElementById('formTitle').value = proj.title;
-    document.getElementById('formCategory').value = proj.category || '';
-    document.getElementById('formDescription').value = proj.description || '';
-    document.getElementById('formComplexity').value = proj.complexity || 'media';
-    document.getElementById('formStatus').value = proj.status || 'en_progreso';
-    document.getElementById('formPriority').value = proj.priority || 'media';
-    document.getElementById('formEstimatedHours').value = proj.estimatedHours || 30;
-    document.getElementById('formRevisionFrequency').value = proj.revisionFrequency || 'Semanal';
-    document.getElementById('formTargetDate').value = proj.targetDate || '';
-
-    // Load existing milestones
-    if (proj.milestones && proj.milestones.length > 0) {
-      proj.milestones.forEach(m => addMilestoneField(m.title, m.completed));
-    } else {
-      addMilestoneField('', false);
-    }
+    document.getElementById('formProjectTitle').value = proj.title;
+    document.getElementById('formProjectDesc').value = proj.description || '';
+    document.getElementById('formProjectComplexity').value = proj.complexity || 'media';
+    document.getElementById('formProjectFrequency').value = proj.revisionFrequency || 'Semanal';
+    document.getElementById('formProjectHours').value = proj.estimatedHours || 40;
+    document.getElementById('formProjectDeadline').value = proj.deadline || '';
   } else {
-    modalTitle.textContent = 'Nuevo Proyecto';
+    titleEl.textContent = 'Nuevo Proyecto';
     form.reset();
     document.getElementById('formProjectId').value = '';
-    document.getElementById('formComplexity').value = 'media';
-    document.getElementById('formStatus').value = 'en_progreso';
-    document.getElementById('formPriority').value = 'media';
-    document.getElementById('formRevisionFrequency').value = 'Cada 2-3 días';
-    document.getElementById('formEstimatedHours').value = 40;
-
-    // Empty milestone fields ready for user's own milestones
-    addMilestoneField('', false);
-    addMilestoneField('', false);
+    document.getElementById('formProjectComplexity').value = 'alta';
+    document.getElementById('formProjectFrequency').value = 'Semanal';
+    document.getElementById('formProjectHours').value = 60;
   }
 
   modal.classList.remove('hidden');
@@ -550,100 +676,43 @@ function closeProjectModal() {
   document.getElementById('projectModal').classList.add('hidden');
 }
 
-function addMilestoneField(value = '', completed = false) {
-  const container = document.getElementById('milestonesContainer');
-  const row = document.createElement('div');
-  row.className = 'flex items-center gap-2 milestone-input-row';
-  row.innerHTML = `
-    <input type="checkbox" ${completed ? 'checked' : ''} class="rounded border-slate-700 bg-slate-900 text-brand-600 focus:ring-0">
-    <input type="text" value="${escapeHtml(value)}" placeholder="Ej: Maquetación del Dashboard..." class="flex-1 bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-lg px-3 py-1.5 focus:ring-1 focus:ring-brand-500 focus:outline-none">
-    <button type="button" onclick="this.parentElement.remove()" class="text-slate-500 hover:text-rose-400 p-1">
-      <i data-lucide="x" class="w-4 h-4"></i>
-    </button>
-  `;
-  container.appendChild(row);
-  lucide.createIcons();
-}
-
 function handleProjectFormSubmit(e) {
   e.preventDefault();
 
   const id = document.getElementById('formProjectId').value;
-  const title = document.getElementById('formTitle').value.trim();
-  const category = document.getElementById('formCategory').value.trim();
-  const description = document.getElementById('formDescription').value.trim();
-  const complexity = document.getElementById('formComplexity').value;
-  const status = document.getElementById('formStatus').value;
-  const priority = document.getElementById('formPriority').value;
-  const estimatedHours = Number(document.getElementById('formEstimatedHours').value) || 0;
-  const revisionFrequency = document.getElementById('formRevisionFrequency').value;
-  const targetDate = document.getElementById('formTargetDate').value;
-
-  // Extract milestones from inputs
-  const milestoneRows = document.querySelectorAll('.milestone-input-row');
-  const milestones = [];
-  milestoneRows.forEach((row, idx) => {
-    const textInput = row.querySelector('input[type="text"]');
-    const checkInput = row.querySelector('input[type="checkbox"]');
-    if (textInput && textInput.value.trim()) {
-      milestones.push({
-        id: `m-${Date.now()}-${idx}`,
-        title: textInput.value.trim(),
-        completed: checkInput.checked
-      });
-    }
-  });
-
-  const nowIso = new Date().toISOString();
+  const title = document.getElementById('formProjectTitle').value.trim();
+  const description = document.getElementById('formProjectDesc').value.trim();
+  const complexity = document.getElementById('formProjectComplexity').value;
+  const revisionFrequency = document.getElementById('formProjectFrequency').value;
+  const estimatedHours = Number(document.getElementById('formProjectHours').value) || 0;
+  const deadline = document.getElementById('formProjectDeadline').value;
 
   if (id) {
-    // Edit existing project
     const proj = projects.find(p => p.id === id);
     if (proj) {
       proj.title = title;
-      proj.category = category;
       proj.description = description;
       proj.complexity = complexity;
-      proj.status = status;
-      proj.priority = priority;
-      proj.estimatedHours = estimatedHours;
       proj.revisionFrequency = revisionFrequency;
-      proj.targetDate = targetDate;
-      proj.milestones = milestones;
-      proj.updatedAt = nowIso;
-
-      // Recalculate progress if there are milestones
-      if (milestones.length > 0) {
-        const completed = milestones.filter(m => m.completed).length;
-        proj.progress = Math.round((completed / milestones.length) * 100);
-      }
+      proj.estimatedHours = estimatedHours;
+      proj.deadline = deadline;
     }
-    showToast('Proyecto actualizado con éxito');
+    showToast('Proyecto actualizado');
   } else {
-    // Create new project
-    const completedCount = milestones.filter(m => m.completed).length;
-    const initialProgress = milestones.length > 0 ? Math.round((completedCount / milestones.length) * 100) : 0;
-
     const newProj = {
       id: `proj-${Date.now()}`,
       title,
-      category,
       description,
       complexity,
-      status,
-      priority,
-      estimatedHours,
-      spentHours: 0,
       revisionFrequency,
-      targetDate,
-      progress: initialProgress,
-      createdAt: nowIso,
-      updatedAt: nowIso,
-      milestones,
-      reviews: []
+      estimatedHours,
+      deadline,
+      reviews: [],
+      activities: []
     };
-    projects.unshift(newProj);
-    showToast('¡Proyecto creado con éxito!');
+    projects.push(newProj);
+    activeProjectId = newProj.id;
+    showToast('Proyecto creado con éxito');
   }
 
   saveProjects();
@@ -651,79 +720,149 @@ function handleProjectFormSubmit(e) {
   renderApp();
 }
 
-// ==========================================
-// MODAL: LOG REVISION
-// ==========================================
-function openRevisionModal(projectId) {
-  const proj = projects.find(p => p.id === projectId);
-  if (!proj) return;
+function deleteCurrentProject() {
+  const current = getActiveProject();
+  if (!current) return;
 
-  document.getElementById('revisionProjectId').value = proj.id;
-  document.getElementById('revisionModalProjectTitle').textContent = `Proyecto: ${proj.title}`;
-  document.getElementById('revisionTitle').value = `Revisión #${(proj.reviews ? proj.reviews.length : 0) + 1}`;
-  document.getElementById('revisionHours').value = '2';
-  document.getElementById('revisionNotes').value = '';
-  document.getElementById('revisionProgressSlider').value = proj.progress || 0;
-  document.getElementById('revisionProgressLabel').textContent = `${proj.progress || 0}%`;
+  if (confirm(`¿Estás seguro de eliminar el proyecto "${current.title}" y todas sus actividades?`)) {
+    projects = projects.filter(p => p.id !== current.id);
+    activeProjectId = projects.length > 0 ? projects[0].id : null;
+    saveProjects();
+    renderApp();
+    showToast('Proyecto eliminado');
+  }
+}
 
-  document.getElementById('revisionModal').classList.remove('hidden');
+// ==========================================
+// MODAL: RESUMEN GERENCIAL
+// ==========================================
+function openResumenModal() {
+  const current = getActiveProject();
+  if (!current) return;
+
+  document.getElementById('resumenProjectName').textContent = current.title;
+
+  const activities = current.activities || [];
+  const total = activities.length;
+  const running = activities.filter(a => a.status === 'ejecucion').length;
+  const late = activities.filter(a => a.status === 'atrasado').length;
+  const completed = activities.filter(a => a.status === 'completado').length;
+  const overall = calculateProjectProgress(current);
+
+  document.getElementById('resumenProgressPct').textContent = `${overall}%`;
+  document.getElementById('resumenProgressBar').style.width = `${overall}%`;
+
+  document.getElementById('resumenTotalActivities').textContent = total;
+  document.getElementById('resumenRunningActivities').textContent = running;
+  document.getElementById('resumenLateActivities').textContent = late;
+  document.getElementById('resumenCompletedActivities').textContent = completed;
+
+  // Health text
+  const healthEl = document.getElementById('resumenHealthText');
+  if (late > 0) {
+    healthEl.innerHTML = `<span class="text-rose-400 font-bold">⚠️ Atención:</span> Hay ${late} actividad(es) atrasada(s). Se recomienda revisar bloqueos.`;
+  } else if (overall === 100) {
+    healthEl.innerHTML = `<span class="text-emerald-400 font-bold">🎉 Proyecto Completado:</span> Todas las actividades han alcanzado el 100%.`;
+  } else {
+    healthEl.innerHTML = `<span class="text-cyan-400 font-bold">✔️ En orden:</span> Proyecto en ejecución con cronograma al día.`;
+  }
+
+  document.getElementById('resumenComplexity').textContent = COMPLEXITY_LABELS[current.complexity] || 'Media';
+  document.getElementById('resumenFrequency').textContent = current.revisionFrequency || 'Semanal';
+  document.getElementById('resumenHours').textContent = current.estimatedHours ? `${current.estimatedHours} horas` : 'No asignado';
+  document.getElementById('resumenDeadline').textContent = current.deadline || 'Sin fecha fija';
+
+  document.getElementById('resumenModal').classList.remove('hidden');
   lucide.createIcons();
 }
 
-function closeRevisionModal() {
-  document.getElementById('revisionModal').classList.add('hidden');
-}
-
-function handleRevisionFormSubmit(e) {
-  e.preventDefault();
-
-  const projectId = document.getElementById('revisionProjectId').value;
-  const proj = projects.find(p => p.id === projectId);
-  if (!proj) return;
-
-  const title = document.getElementById('revisionTitle').value.trim();
-  const hours = Number(document.getElementById('revisionHours').value) || 0;
-  const status = document.getElementById('revisionStatus').value;
-  const notes = document.getElementById('revisionNotes').value.trim();
-  const newProgress = Number(document.getElementById('revisionProgressSlider').value);
-
-  if (!proj.reviews) proj.reviews = [];
-
-  const newReview = {
-    id: `rev-${Date.now()}`,
-    title,
-    date: new Date().toISOString().split('T')[0],
-    hours,
-    status,
-    notes
-  };
-
-  proj.reviews.push(newReview);
-  proj.spentHours = (Number(proj.spentHours) || 0) + hours;
-  proj.progress = newProgress;
-  proj.updatedAt = new Date().toISOString();
-
-  if (newProgress === 100) {
-    proj.status = 'completado';
-  } else if (proj.status === 'planificado' && newProgress > 0) {
-    proj.status = 'en_progreso';
-  }
-
-  saveProjects();
-  closeRevisionModal();
-  renderApp();
-  showToast(`Revisión registrada (+${hours}h sumadas al proyecto)`);
+function closeResumenModal() {
+  document.getElementById('resumenModal').classList.add('hidden');
 }
 
 // ==========================================
-// UTILITIES & EXPORT
+// MODAL: SEGUIMIENTO & BITÁCORA
+// ==========================================
+function openSeguimientoModal() {
+  const current = getActiveProject();
+  if (!current) return;
+
+  document.getElementById('seguimientoProjectName').textContent = `Proyecto: ${current.title}`;
+  renderSeguimientoTimeline(current);
+
+  document.getElementById('seguimientoModal').classList.remove('hidden');
+  lucide.createIcons();
+}
+
+function closeSeguimientoModal() {
+  document.getElementById('seguimientoModal').classList.add('hidden');
+}
+
+function renderSeguimientoTimeline(project) {
+  const container = document.getElementById('seguimientoTimeline');
+  const reviews = project.reviews || [];
+
+  if (reviews.length === 0) {
+    container.innerHTML = '<p class="text-xs text-slate-400 italic">No hay revisiones de seguimiento registradas aún.</p>';
+    return;
+  }
+
+  container.innerHTML = reviews.slice().reverse().map(rev => `
+    <div class="bg-navyBg p-3 rounded-xl border border-navyBorder flex items-start justify-between gap-3">
+      <div>
+        <p class="text-xs text-slate-200">${escapeHtml(rev.text)}</p>
+        <span class="text-[10px] text-cyan-400 font-semibold mt-1 block">📅 ${rev.date}</span>
+      </div>
+      <button onclick="deleteReview('${rev.id}')" title="Eliminar registro" class="text-slate-500 hover:text-rose-400 p-1">
+        <i data-lucide="trash" class="w-3.5 h-3.5"></i>
+      </button>
+    </div>
+  `).join('');
+
+  lucide.createIcons();
+}
+
+function handleAddReviewSubmit(e) {
+  e.preventDefault();
+  const current = getActiveProject();
+  if (!current) return;
+
+  const text = document.getElementById('seguimientoNoteText').value.trim();
+  if (!text) return;
+
+  if (!current.reviews) current.reviews = [];
+
+  current.reviews.push({
+    id: `rev-${Date.now()}`,
+    date: new Date().toISOString().slice(0, 10),
+    text
+  });
+
+  document.getElementById('seguimientoNoteText').value = '';
+  saveProjects();
+  renderSeguimientoTimeline(current);
+  showToast('Entrada de seguimiento agregada');
+}
+
+function deleteReview(reviewId) {
+  const current = getActiveProject();
+  if (!current || !current.reviews) return;
+
+  current.reviews = current.reviews.filter(r => r.id !== reviewId);
+  saveProjects();
+  renderSeguimientoTimeline(current);
+  showToast('Entrada eliminada');
+}
+
+// ==========================================
+// UTILITIES
 // ==========================================
 function showToast(message) {
   const container = document.getElementById('toastContainer');
   const toast = document.createElement('div');
-  toast.className = 'bg-slate-900 border border-slate-700 text-white px-4 py-2.5 rounded-xl shadow-xl text-xs flex items-center gap-2 transform transition-all duration-300 translate-y-2 opacity-0';
+  toast.className = 'bg-navyCard border border-cyanAction/50 text-white px-4 py-2.5 rounded-xl shadow-2xl text-xs flex items-center gap-2 transform transition-all duration-300 translate-y-2 opacity-0';
   toast.innerHTML = `
-    <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+    <i data-lucide="check-circle" class="w-4 h-4 text-cyan-400"></i>
     <span>${escapeHtml(message)}</span>
   `;
   container.appendChild(toast);
@@ -743,11 +882,11 @@ function exportDataJSON() {
   const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projects, null, 2));
   const downloadAnchor = document.createElement('a');
   downloadAnchor.setAttribute("href", dataStr);
-  downloadAnchor.setAttribute("download", `proyectos_roadmap_${new Date().toISOString().slice(0, 10)}.json`);
+  downloadAnchor.setAttribute("download", `proyectos_procesos_${new Date().toISOString().slice(0, 10)}.json`);
   document.body.appendChild(downloadAnchor);
   downloadAnchor.click();
   downloadAnchor.remove();
-  showToast('Copia de seguridad descargada en JSON');
+  showToast('Copia de seguridad descargada');
 }
 
 function escapeHtml(string) {

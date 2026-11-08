@@ -1,8 +1,8 @@
-/* Custom CSS enhancements */
+/* Custom CSS Enhancements */
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: scale(0.97) translateY(-6px);
+    transform: scale(0.98) translateY(-4px);
   }
   to {
     opacity: 1;
@@ -11,7 +11,7 @@
 }
 
 .animate-fadeIn {
-  animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Custom scrollbars */
@@ -21,80 +21,104 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #0b0f19;
+  background: #05192d;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1f2937;
+  background: #123254;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #374151;
+  background: #1a4675;
 }
 
-/* Card hover glow */
-.project-card {
-  transition: all 0.25s ease;
+/* Branch connector curve */
+.branch-connector {
+  position: absolute;
+  left: -18px;
+  top: 50%;
+  width: 16px;
+  height: 2px;
+  background-color: #00b4d8;
 }
 
-.project-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 28px -10px rgba(0, 0, 0, 0.5), 0 0 15px -3px rgba(99, 102, 241, 0.15);
+/* Activity Card Hover */
+.activity-card {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-/* Badges styling */
-.badge-complexity-baja {
-  background-color: rgba(16, 185, 129, 0.12);
-  color: #34d399;
-  border: 1px solid rgba(16, 185, 129, 0.25);
+.activity-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.35);
 }
 
-.badge-complexity-media {
-  background-color: rgba(59, 130, 246, 0.12);
-  color: #60a5fa;
-  border: 1px solid rgba(59, 130, 246, 0.25);
+/* Custom Interactive Range Slider */
+.activity-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 72px;
+  height: 6px;
+  background: #cddfe9;
+  border-radius: 9999px;
+  outline: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
 }
 
-.badge-complexity-alta {
-  background-color: rgba(249, 115, 22, 0.12);
-  color: #fb923c;
-  border: 1px solid rgba(249, 115, 22, 0.25);
+.activity-slider:hover {
+  opacity: 1;
 }
 
-.badge-complexity-muy_alta {
-  background-color: rgba(239, 68, 68, 0.12);
-  color: #f87171;
-  border: 1px solid rgba(239, 68, 68, 0.25);
+.activity-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: #0096c7;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  transition: transform 0.1s ease;
 }
 
-/* Status colors */
-.status-planificado {
-  background-color: rgba(148, 163, 184, 0.12);
-  color: #cbd5e1;
-  border: 1px solid rgba(148, 163, 184, 0.25);
+.activity-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  background: #0077b6;
 }
 
-.status-en_progreso {
-  background-color: rgba(99, 102, 241, 0.12);
-  color: #a5b4fc;
-  border: 1px solid rgba(99, 102, 241, 0.25);
+.activity-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: #0096c7;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 }
 
-.status-en_revision {
-  background-color: rgba(245, 158, 11, 0.12);
-  color: #fcd34d;
-  border: 1px solid rgba(245, 158, 11, 0.25);
+/* Status Badges */
+.badge-status-atrasado {
+  background-color: #592026;
+  color: #fca5a5;
+  border: 1px solid #732a32;
 }
 
-.status-completado {
-  background-color: rgba(16, 185, 129, 0.12);
-  color: #34d399;
-  border: 1px solid rgba(16, 185, 129, 0.25);
+.badge-status-ejecucion {
+  background-color: #544318;
+  color: #fde047;
+  border: 1px solid #6b561e;
 }
 
-.status-pausado {
-  background-color: rgba(100, 116, 139, 0.2);
+.badge-status-completado {
+  background-color: #134725;
+  color: #86efac;
+  border: 1px solid #1a5c30;
+}
+
+.badge-status-por_iniciar {
+  background-color: #243345;
   color: #94a3b8;
-  border: 1px solid rgba(100, 116, 139, 0.3);
+  border: 1px solid #32475e;
 }
