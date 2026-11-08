@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ProjectMaster | Roadmap & Control de Revisiones</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Tailwind Configuration -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            },
+            darkBg: '#0b0f19',
+            cardBg: '#111827',
+            cardBorder: '#1f2937',
+            cardHover: '#1a2234'
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-darkBg text-slate-100 min-h-screen font-sans antialiased selection:bg-brand-500 selection:text-white pb-20">
+
+  <!-- TOP NAVIGATION BAR -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-400 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <i data-lucide="layers" class="w-5 h-5 text-white"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+            DevRoadmap <span class="text-xs px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-400 border border-brand-500/30 font-medium">Proyectos & Revisiones</span>
+          </h1>
+          <p class="text-xs text-slate-400">Control de complejidad, tiempos estimados y seguimiento de hitos</p>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center space-x-2 sm:space-x-3">
+        <button id="btnExportData" title="Descargar copia de seguridad en JSON" class="p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-lg transition border border-transparent hover:border-slate-700 text-xs flex items-center gap-1.5">
+          <i data-lucide="download" class="w-4 h-4"></i>
+          <span class="hidden md:inline">Exportar</span>
+        </button>
+        <button id="btnOpenNewProjectModal" class="flex items-center gap-2 bg-brand-600 hover:bg-brand-500 text-white font-medium text-sm px-4 py-2 rounded-xl shadow-lg shadow-indigo-600/30 transition transform active:scale-95">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <span>+ Nuevo Proyecto</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+
+    <!-- KPI STATS SUMMARY GRID -->
+    <section class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <!-- Total Projects -->
+      <div class="bg-cardBg border border-cardBorder rounded-2xl p-5 shadow-sm relative overflow-hidden group hover:border-slate-700 transition">
+        <div class="flex items-center justify-between text-slate-400 mb-2">
+          <span class="text-xs font-semibold uppercase tracking-wider">Total Proyectos</span>
+          <div class="p-2 bg-indigo-500/10 rounded-lg text-brand-400">
+            <i data-lucide="folder-kanban" class="w-4 h-4"></i>
+          </div>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <span id="statTotalProjects" class="text-3xl font-extrabold text-white">0</span>
+          <span class="text-xs text-slate-400" id="statActiveBreakdown">0 activos</span>
+        </div>
+        <div class="mt-2 flex items-center text-xs text-emerald-400">
+          <i data-lucide="trending-up" class="w-3.5 h-3.5 mr-1"></i>
+          <span id="statCompletedCount">0 finalizados</span>
+        </div>
+      </div>
+
+      <!-- General Progress -->
+      <div class="bg-cardBg border border-cardBorder rounded-2xl p-5 shadow-sm relative overflow-hidden group hover:border-slate-700 transition">
+        <div class="flex items-center justify-between text-slate-400 mb-2">
+          <span class="text-xs font-semibold uppercase tracking-wider">Progreso Global</span>
+          <div class="p-2 bg-emerald-500/10 rounded-lg text-emerald-400">
+            <i data-lucide="gauge" class="w-4 h-4"></i>
+          </div>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <span id="statAverageProgress" class="text-3xl font-extrabold text-white">0%</span>
+          <span class="text-xs text-slate-400">completado prom.</span>
+        </div>
+        <div class="w-full bg-slate-800 rounded-full h-1.5 mt-3 overflow-hidden">
+          <div id="statProgressBar" class="bg-gradient-to-r from-brand-500 to-emerald-400 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Time Tracking -->
+      <div class="bg-cardBg border border-cardBorder rounded-2xl p-5 shadow-sm relative overflow-hidden group hover:border-slate-700 transition">
+        <div class="flex items-center justify-between text-slate-400 mb-2">
+          <span class="text-xs font-semibold uppercase tracking-wider">Horas Estimadas</span>
+          <div class="p-2 bg-amber-500/10 rounded-lg text-amber-400">
+            <i data-lucide="clock" class="w-4 h-4"></i>
+          </div>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <span id="statTotalEstimatedHours" class="text-3xl font-extrabold text-white">0h</span>
+          <span class="text-xs text-slate-400">estimadas</span>
+        </div>
+        <div class="mt-2 flex items-center text-xs text-slate-400">
+          <span class="text-indigo-400 font-semibold" id="statTotalSpentHours">0h</span>
+          <span class="ml-1">invertidas en revisiones</span>
+        </div>
+      </div>
+
+      <!-- Pending Reviews Checkpoint -->
+      <div class="bg-cardBg border border-cardBorder rounded-2xl p-5 shadow-sm relative overflow-hidden group hover:border-slate-700 transition">
+        <div class="flex items-center justify-between text-slate-400 mb-2">
+          <span class="text-xs font-semibold uppercase tracking-wider">Revisiones / Hitos</span>
+          <div class="p-2 bg-rose-500/10 rounded-lg text-rose-400">
+            <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+          </div>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <span id="statPendingReviews" class="text-3xl font-extrabold text-white">0</span>
+          <span class="text-xs text-slate-400">pendientes</span>
+        </div>
+        <div class="mt-2 flex items-center text-xs text-slate-400">
+          <span class="text-emerald-400 font-medium" id="statCompletedReviews">0</span>
+          <span class="ml-1">revisiones superadas</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEARCH & FILTER TOOLBAR -->
+    <div class="bg-cardBg border border-cardBorder rounded-2xl p-4 mb-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+      <!-- Search Input -->
+      <div class="relative w-full md:w-80">
+        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+        <input 
+          type="text" 
+          id="searchInput" 
+          placeholder="Buscar proyectos, tags o desc..." 
+          class="w-full bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent placeholder-slate-500"
+        >
+      </div>
+
+      <!-- Filters & Sorters -->
+      <div class="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+        <!-- Filter Status -->
+        <select id="filterStatus" class="bg-slate-900 border border-slate-700 text-slate-300 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand-500">
+          <option value="ALL">Todos los Estados</option>
+          <option value="planificado">📋 Planificado</option>
+          <option value="en_progreso">⚡ En Progreso</option>
+          <option value="en_revision">🔍 En Revisión</option>
+          <option value="completado">✅ Completado</option>
+          <option value="pausado">⏸️ En Pausa</option>
+        </select>
+
+        <!-- Filter Complexity -->
+        <select id="filterComplexity" class="bg-slate-900 border border-slate-700 text-slate-300 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand-500">
+          <option value="ALL">Toda Complejidad</option>
+          <option value="baja">🟢 Baja (Rápido / MVP)</option>
+          <option value="media">🔵 Media (Estándar)</option>
+          <option value="alta">🟠 Alta (Complejo)</option>
+          <option value="muy_alta">🔴 Muy Alta (Arquitectura / Full)</option>
+        </select>
+
+        <!-- Sort By -->
+        <select id="sortBy" class="bg-slate-900 border border-slate-700 text-slate-300 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand-500">
+          <option value="updated">Última Actualización</option>
+          <option value="progress_asc">Progreso (Menor a Mayor)</option>
+          <option value="progress_desc">Progreso (Mayor a Menor)</option>
+          <option value="time_desc">Mayor Tiempo Estimado</option>
+          <option value="complexity_desc">Mayor Complejidad</option>
+        </select>
+
+        <!-- View layout toggler -->
+        <div class="hidden sm:flex items-center bg-slate-900 border border-slate-700 rounded-xl p-1">
+          <button id="viewGridBtn" class="p-1.5 rounded-lg bg-slate-800 text-brand-400" title="Vista en Cuadrícula">
+            <i data-lucide="layout-grid" class="w-4 h-4"></i>
+          </button>
+          <button id="viewListBtn" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-200" title="Vista Compacta">
+            <i data-lucide="list" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN PROJECTS SECTION -->
+    <div id="projectsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Project cards injected via JavaScript -->
+    </div>
+
+    <!-- Empty State (When no match found or no projects yet) -->
+    <div id="emptyState" class="hidden text-center py-20 bg-cardBg border border-dashed border-slate-800 rounded-3xl p-8 max-w-lg mx-auto my-6 shadow-sm">
+      <div class="w-16 h-16 rounded-2xl bg-brand-500/10 text-brand-400 mx-auto flex items-center justify-center mb-4">
+        <i data-lucide="folder-plus" class="w-8 h-8"></i>
+      </div>
+      <h3 class="text-lg font-bold text-slate-100">Panel limpio para tus proyectos</h3>
+      <p class="text-xs text-slate-400 mt-2 max-w-sm mx-auto">
+        No hay proyectos precargados. Agrega tu propio proyecto para definir su complejidad, estimar tiempos y programar sus revisiones.
+      </p>
+      <button onclick="document.getElementById('btnOpenNewProjectModal').click()" class="mt-5 px-5 py-2.5 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-indigo-600/30 transition transform active:scale-95 flex items-center gap-2 mx-auto">
+        <i data-lucide="plus-circle" class="w-4 h-4"></i>
+        <span>Agregar Mi Proyecto</span>
+      </button>
+    </div>
+  </main>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: CREAR / EDITAR PROYECTO -->
+  <!-- ======================================================== -->
+  <div id="projectModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden overflow-y-auto">
+    <div class="bg-cardBg border border-slate-700 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden my-8 animate-fadeIn">
+      
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/60">
+        <div class="flex items-center gap-2.5">
+          <div class="p-2 rounded-xl bg-brand-500/10 text-brand-400">
+            <i data-lucide="folder-plus" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h2 id="modalTitle" class="text-lg font-bold text-white">Nuevo Proyecto</h2>
+            <p class="text-xs text-slate-400">Define alcance, tiempos y ciclo de revisiones</p>
+          </div>
+        </div>
+        <button id="btnCloseProjectModal" class="text-slate-400 hover:text-slate-200 p-1.5 rounded-lg hover:bg-slate-800 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Modal Form Body -->
+      <form id="projectForm" class="p-6 space-y-4">
+        <input type="hidden" id="formProjectId">
+
+        <!-- Title & Category -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Nombre del Proyecto *</label>
+            <input type="text" id="formTitle" required placeholder="Ej. App de Finanzas Personales" class="w-full bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Categoría</label>
+            <input type="text" id="formCategory" placeholder="Web, Mobile, AI, SaaS..." class="w-full bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Descripción y Objetivos</label>
+          <textarea id="formDescription" rows="2" placeholder="Objetivo general, stack tecnológico planeado o entregable esperado..." class="w-full bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-brand-500 focus:outline-none"></textarea>
+        </div>
+
+        <!-- Complexity, Status & Priority -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Complejidad *</label>
+            <select id="formComplexity" required class="w-full bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+              <option value="baja">🟢 Baja (Simple / Rápido)</option>
+              <option value="media" selected>🔵 Media (Moderado)</option>
+              <option value="alta">🟠 Alta (Complejo / Multicapa)</option>
+              <option value="muy_alta">🔴 Muy Alta (Retador / Crítico)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Estado</label>
+            <select id="formStatus" class="w-full bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+              <option value="planificado">📋 Planificado</option>
+              <option value="en_progreso" selected>⚡ En Progreso</option>
+              <option value="en_revision">🔍 En Revisión</option>
+              <option value="completado">✅ Completado</option>
+              <option value="pausado">⏸️ En Pausa</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Prioridad</label>
+            <select id="formPriority" class="w-full bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+              <option value="baja">Baja</option>
+              <option value="media" selected>Media</option>
+              <option value="alta">Alta</option>
+              <option value="urgente">🔥 Urgente</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Time & Revision Cycle Details -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-900/40 p-3.5 rounded-xl border border-slate-800">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 uppercase mb-1 flex items-center gap-1">
+              <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-400"></i>
+              Tiempo Est. (Horas) *
+            </label>
+            <input type="number" id="formEstimatedHours" min="1" max="1000" placeholder="Ej. 40" required class="w-full bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-xl px-3 py-2 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 uppercase mb-1 flex items-center gap-1">
+              <i data-lucide="calendar" class="w-3.5 h-3.5 text-indigo-400"></i>
+              Cada cuánto se revisa?
+            </label>
+            <select id="formRevisionFrequency" class="w-full bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-xl px-3 py-2 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+              <option value="Diario">Cada Día (Diario)</option>
+              <option value="Cada 2-3 días" selected>Cada 2-3 días</option>
+              <option value="Semanal">Semanal (Cada 7 días)</option>
+              <option value="Quincenal">Quincenal (Cada sprint/15d)</option>
+              <option value="Mensual">Mensual</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 uppercase mb-1 flex items-center gap-1">
+              <i data-lucide="target" class="w-3.5 h-3.5 text-emerald-400"></i>
+              Fecha Objetivo
+            </label>
+            <input type="date" id="formTargetDate" class="w-full bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-xl px-3 py-2 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+          </div>
+        </div>
+
+        <!-- Initial Milestones / Revisions -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <label class="text-xs font-semibold text-slate-300 uppercase flex items-center gap-1.5">
+              <i data-lucide="list-checks" class="w-4 h-4 text-brand-400"></i>
+              Hitos / Revisiones Programadas
+            </label>
+            <button type="button" id="btnAddMilestoneField" class="text-xs text-brand-400 hover:text-brand-300 font-medium flex items-center gap-1">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Agregar Hito
+            </button>
+          </div>
+          <p class="text-xs text-slate-500 mb-2">Define los puntos clave donde harás una revisión (ej: Maquetación, API, Testing, Demo).</p>
+          <div id="milestonesContainer" class="space-y-2 max-h-40 overflow-y-auto pr-1">
+            <!-- Dynamic milestone inputs -->
+          </div>
+        </div>
+
+        <!-- Modal Actions -->
+        <div class="pt-4 border-t border-slate-800 flex items-center justify-end space-x-3">
+          <button type="button" id="btnCancelModal" class="px-4 py-2 text-slate-400 hover:text-slate-200 text-sm rounded-xl hover:bg-slate-800 transition">
+            Cancelar
+          </button>
+          <button type="submit" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-500 text-white font-medium text-sm rounded-xl shadow-lg shadow-indigo-600/30 transition">
+            Guardar Proyecto
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: REGISTRAR REVISIÓN (LOG REVISION) -->
+  <!-- ======================================================== -->
+  <div id="revisionModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-cardBg border border-slate-700 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden animate-fadeIn">
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/60">
+        <div class="flex items-center gap-2.5">
+          <div class="p-2 rounded-xl bg-emerald-500/10 text-emerald-400">
+            <i data-lucide="clipboard-check" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h2 class="text-base font-bold text-white">Registrar Revisión</h2>
+            <p class="text-xs text-slate-400" id="revisionModalProjectTitle">Proyecto</p>
+          </div>
+        </div>
+        <button id="btnCloseRevisionModal" class="text-slate-400 hover:text-slate-200 p-1.5 rounded-lg hover:bg-slate-800 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="revisionForm" class="p-6 space-y-4">
+        <input type="hidden" id="revisionProjectId">
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Título de la Revisión *</label>
+          <input type="text" id="revisionTitle" required placeholder="Ej. Revisión de Frontend y Responsive" class="w-full bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Horas dedicadas</label>
+            <input type="number" id="revisionHours" min="0" step="0.5" value="2" class="w-full bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Resultado</label>
+            <select id="revisionStatus" class="w-full bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+              <option value="superada">🟢 Aprobada / Superada</option>
+              <option value="observaciones">🟠 Con Observaciones</option>
+              <option value="bloqueada">🔴 Bloqueada / Requiere Ajustes</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Notas y Feedback de la Revisión</label>
+          <textarea id="revisionNotes" rows="3" placeholder="¿Qué se revisó? ¿Qué funcionó bien? ¿Qué falta ajustar antes de la siguiente revisión?" class="w-full bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-brand-500 focus:outline-none"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 uppercase mb-1 flex justify-between">
+            <span>Ajustar Progreso General</span>
+            <span id="revisionProgressLabel" class="text-brand-400 font-bold">50%</span>
+          </label>
+          <input type="range" id="revisionProgressSlider" min="0" max="100" value="50" class="w-full accent-indigo-500 cursor-pointer">
+        </div>
+
+        <div class="pt-3 border-t border-slate-800 flex items-center justify-end space-x-2">
+          <button type="button" id="btnCancelRevisionModal" class="px-4 py-2 text-slate-400 hover:text-slate-200 text-sm rounded-xl hover:bg-slate-800 transition">
+            Cancelar
+          </button>
+          <button type="submit" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-sm rounded-xl shadow-lg shadow-emerald-600/30 transition">
+            Guardar Revisión
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+  <!-- Custom Scripts -->
+  <script src="app.js"></script>
+</body>
+</html>
