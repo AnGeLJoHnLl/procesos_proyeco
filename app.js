@@ -4,120 +4,115 @@
  * Hoja de ruta y plan técnico de trabajo (Semanas 1 a 4)
  */
 
-const STORAGE_KEY = 'dev_roadmap_mao_laraigo_v2';
+const STORAGE_KEY = 'dev_roadmap_mao_laraigo_v3';
 
 // Project Seed Data: MÓDULO DE AGILIDAD OPERATIVA (MAO) — LARAIGO
 const INITIAL_PROJECTS = [
   {
     id: 'proj-mao-laraigo',
     title: 'MÓDULO DE AGILIDAD OPERATIVA (MAO) — LARAIGO',
-    description: 'Mapeo cronológico de auditorías, blindaje de seguridad, modularización por carpetas (/src/) y estabilización operativa desde v2.0.3 hacia v2.1.0. Alcance: Activaciones (Piloto/BETA) y Otras Áreas (Despliegue 80%).',
+    description: 'Plan de trabajo y seguimiento semanal de mejoras a partir de la v2.0.3: revisión de seguridad de la API, control de duplicados, ordenamiento del código por bloques/carpetas y pruebas de estabilidad. Alcance: Área de Activaciones y Otras Áreas (80%).',
     complexity: 'muy_alta', // baja | media | alta | muy_alta
     revisionFrequency: 'Semanal / Ventana Bi-semanal',
     estimatedHours: 160,
     deadline: '2026-12-04',
-    governance: 'Despliegue manual con privilegios de Administrador mediante ventana de mantenimiento bi-semanal (instalador batch/VBS en HKLM).',
+    governance: 'Actualizaciones programadas cada 2 semanas con permisos de Administrador para mantener estable la operación.',
     reviews: [
       {
         id: 'rev-1',
         date: '2026-11-09',
-        text: 'Cierre de Semana 1 (v2.0.4 Hardened): Blindaje de API, purga de token en localStorage a variable volátil en RAM, handshake criptográfico (_nonce) y ofuscación de SQL (_k) completados al 100%. Código listo para pase a producción.'
+        text: 'Inicio de Semana 1 (sobre base v2.0.3): Se comenzó la revisión de seguridad de la API y del manejo de sesión para que las credenciales no queden guardadas en el navegador.'
       },
       {
         id: 'rev-2',
         date: '2026-11-09',
-        text: 'Apertura de Semana 2 (v2.0.5 Modular Architecture): Inicio de auditoría línea por línea contra memory leaks en turnos de 8h y desacoplamiento físico hacia carpetas /src/ (security, network, redux, vision, rules, ui).'
+        text: 'Avance en curso: Se está revisando la validación de envío para evitar mensajes duplicados cuando el servidor demora en responder, junto con el ordenamiento del código en secciones claras.'
       },
       {
         id: 'rev-3',
         date: '2026-11-09',
-        text: 'Criterio de Gobernanza TI: Aprobado esquema de ventanas de mantenimiento bi-semanales con permisos de Administrador para proteger la continuidad operativa del 80% del parque desplegado en Otras Áreas.'
+        text: 'Esquema de trabajo: Planificación de 4 semanas enfocada en proteger la estabilidad del Área de Activaciones (Modo Completo) y Otras Áreas (80% en Modo Solo Saludo).'
       }
     ],
     activities: [
       {
         id: 'act-s1-1',
-        title: 'Semana 1: Auditoría de Credenciales, Memoria RAM y Handshake Criptográfico (_nonce)',
+        title: 'Semana 1: Revisión de Seguridad de la API y Protección de Sesión',
         role: 'Área de Activaciones / Soporte',
         dueDate: '2026-11-13',
-        status: 'completado',
-        progress: 100,
+        status: 'ejecucion',
+        progress: 45,
         notes: [
           {
             id: 'n-1',
             date: '2026-11-09',
-            text: 'Eliminación definitiva de localStorage.setItem("__lc_bearer_token") y purga de residuos en disco. Bearer Token encapsulado en variable privada de memoria RAM volátil para evitar robo de sesión en computadoras compartidas.'
+            text: 'En avance: Se está modificando el manejo de la sesión para que el token de acceso funcione únicamente en memoria temporal (RAM) mientras se usa el sistema, evitando que quede guardado en el navegador.'
           },
           {
             id: 'n-2',
-            date: '2026-11-10',
-            text: 'Handshake criptográfico de sesión (_nonce): Firma aleatoria efímera compartida entre content.js y page-bridge.js. Comandos emitidos desde la consola F12 son rechazados y descartados silenciosamente.'
+            date: '2026-11-09',
+            text: 'En revisión: Ajustando la comunicación interna de la extensión y protegiendo las rutas de consulta a la API de Laraigo para mayor seguridad.'
           }
         ]
       },
       {
         id: 'act-s1-2',
-        title: 'Semana 1: Ofuscación de Endpoints, Candados de Idempotencia y Cero Duplicados DOM',
+        title: 'Semana 1: Control de Mensajes Duplicados y Ordenamiento del Código por Bloques',
         role: 'Área de Activaciones / Soporte',
         dueDate: '2026-11-13',
-        status: 'completado',
-        progress: 100,
+        status: 'ejecucion',
+        progress: 30,
         notes: [
           {
             id: 'n-3',
-            date: '2026-11-11',
-            text: 'Ofuscación de Endpoints y SQL: Enmascaramiento en memoria (_k) de rutas (/api/ticket/reply, /api/multi, /api/main) y procedimientos (UFN_CONVERSATION_SEL_INTERACTION). Restricción estricta a *.laraigo.com.'
+            date: '2026-11-09',
+            text: 'En avance: Revisando las validaciones al enviar respuestas por la API para evitar que un mismo mensaje se mande dos veces cuando la red o el servidor tardan en responder.'
           },
           {
             id: 'n-4',
-            date: '2026-11-12',
-            text: 'Candados de Idempotencia y Concurrencia: inFlightReplies y recentSentReplies (<25s) con AbortController (9.5s) para garantizar 0 peticiones POST duplicadas ante latencia.'
-          },
-          {
-            id: 'n-5',
-            date: '2026-11-13',
-            text: 'Supresión de envío doble por DOM: Verificación del historial antes de teclear en caja de chat. Estructuración en 9 bloques (page-bridge.js) y 12 bloques (content.js).'
+            date: '2026-11-09',
+            text: 'En progreso: Ordenando los archivos principales (page-bridge.js y content.js) en bloques numerados y comentados para que cada parte del código se entienda fácilmente.'
           }
         ]
       },
       {
         id: 'act-s2-1',
-        title: 'Semana 2: Desacoplamiento Arquitectónico en Carpetas /src/ (v2.0.5)',
+        title: 'Semana 2: Organización del Código en Carpetas (/src/) por Función',
         role: 'Soporte Técnico / Arquitectura',
         dueDate: '2026-11-20',
-        status: 'ejecucion',
-        progress: 30,
+        status: 'por_iniciar',
+        progress: 0,
         notes: [
           {
             id: 'n-6',
-            date: '2026-11-14',
-            text: 'Migración a arquitectura limpia /src/: /src/security/ (nonce, token volátil, _k), /src/network/ (hooks XHR, fetch, apiPostJson), /src/redux/ (interceptor deduplicator), /src/vision/ (analizador Canvas TOA), /src/rules/ (árbol de decisiones) y /src/ui/ (pastilla de estado y controlador de modos).'
+            date: '2026-11-16',
+            text: 'Programado: Separar los bloques del código en carpetas individuales (/src/security, /src/network, /src/redux, /src/vision, /src/rules y /src/ui) para facilitar futuras mejoras.'
           }
         ]
       },
       {
         id: 'act-s2-2',
-        title: 'Semana 2: Auditoría Línea por Línea contra Memory Leaks y Benchmarking (<35 MB)',
+        title: 'Semana 2: Revisión Línea por Línea del Código y Rendimiento en Turnos de 8h',
         role: 'Soporte Técnico',
         dueDate: '2026-11-20',
-        status: 'ejecucion',
-        progress: 15,
+        status: 'por_iniciar',
+        progress: 0,
         notes: [
           {
             id: 'n-7',
-            date: '2026-11-15',
-            text: 'Auditoría minuciosa de referencias para el recolector de basura (Garbage Collector), asegurando estabilidad en pestañas abiertas durante turnos continuos de 8 horas.'
+            date: '2026-11-17',
+            text: 'Programado: Revisión detallada línea por línea para limpiar variables que ya no se usen y mantener el navegador rápido durante toda la jornada de 8 horas.'
           },
           {
             id: 'n-8',
-            date: '2026-11-16',
-            text: 'Revisión de MutationObserver y addEventListener para desconexión limpia. Benchmarking estricto: consumo de RAM < 35 MB por pestaña en Core i3/i5 con 8GB RAM.'
+            date: '2026-11-18',
+            text: 'Programado: Pruebas de consumo de memoria para asegurar que la extensión se mantenga ligera en los equipos de los asesores.'
           }
         ]
       },
       {
         id: 'act-s3-1',
-        title: 'Semana 3: Pruebas de Estrés y Ráfagas de Tickets (v2.0.6 Release Candidate)',
+        title: 'Semana 3: Pruebas de Estabilidad en Horas Pico (Varios Tickets a la Vez)',
         role: 'Área de Activaciones (Piloto/BETA)',
         dueDate: '2026-11-27',
         status: 'por_iniciar',
@@ -125,19 +120,19 @@ const INITIAL_PROJECTS = [
         notes: [
           {
             id: 'n-9',
-            date: '2026-11-18',
-            text: 'Simulación y monitoreo en horas pico con recepción simultánea de 5 a 10 tickets en la bandeja de Asignados, evaluando respuesta asíncrona sin bloqueos.'
+            date: '2026-11-23',
+            text: 'Programado: Monitoreo en horas de alta demanda cuando entran de 5 a 10 tickets seguidos en la bandeja de Asignados, verificando que todos se respondan sin trabas.'
           },
           {
             id: 'n-10',
-            date: '2026-11-19',
-            text: 'Resiliencia ante micro-cortes de red corporativa: auto-recuperación del Bearer Token sin requerir recargar la página (F5).'
+            date: '2026-11-24',
+            text: 'Programado: Revisión de reconexión automática ante micro-cortes de internet sin necesidad de recargar la página (F5).'
           }
         ]
       },
       {
         id: 'act-s3-2',
-        title: 'Semana 3: Calibración del Árbol de Activaciones (>98% precisión) y Auditoría Otras Áreas',
+        title: 'Semana 3: Revisión de Respuestas en Activaciones y Verificación en Otras Áreas',
         role: 'Activaciones / Otras Áreas',
         dueDate: '2026-11-27',
         status: 'por_iniciar',
@@ -145,19 +140,19 @@ const INITIAL_PROJECTS = [
         notes: [
           {
             id: 'n-11',
-            date: '2026-11-20',
-            text: 'Calibración de los 6 submotivos técnicos: Reenvío de señal, Consulta de Cintillos, Registro de Mesh, SOT de Manto, Derivación a PEXT y Activaciones (precisión esperada > 98%).'
+            date: '2026-11-25',
+            text: 'Programado: Revisión de precisión en los casos de Activaciones (Reenvío de señal, Consulta de Cintillos, Registro de Mesh, SOT de Manto, Derivación a PEXT y Activaciones).'
           },
           {
             id: 'n-12',
-            date: '2026-11-21',
-            text: 'Auditoría en "Otras Áreas" (Modo Solo Saludo): Verificación en el 80% del parque desplegado para confirmar 0% interferencia y envío exacto de saludo en 0s.'
+            date: '2026-11-26',
+            text: 'Programado: Verificación en Otras Áreas (80% desplegado en Modo Solo Saludo) para confirmar que el saludo inicial se envíe al instante sin interferir en el chat.'
           }
         ]
       },
       {
         id: 'act-s4-1',
-        title: 'Semana 4: Feature Freeze y Generación del Paquete USB Consolidado (v2.1.0)',
+        title: 'Semana 4: Cierre de Cambios y Preparación del Instalador Final',
         role: 'Soporte Técnico / Admin TI',
         dueDate: '2026-12-04',
         status: 'por_iniciar',
@@ -165,19 +160,19 @@ const INITIAL_PROJECTS = [
         notes: [
           {
             id: 'n-13',
-            date: '2026-11-25',
-            text: 'Congelamiento estricto de código (Feature Freeze), compilación final de la extensión y batería de pruebas de regresión completas.'
+            date: '2026-11-30',
+            text: 'Programado: Pruebas generales finales sin agregar nuevas funciones para asegurar que todo opere sin errores antes de actualizar los equipos.'
           },
           {
             id: 'n-14',
-            date: '2026-11-26',
-            text: 'Generación de paquete instalador automatizado para memoria USB (script batch/VBS para instalación con cuenta Admin en registro Windows HKLM sin borrado por cambio de usuario).'
+            date: '2026-12-02',
+            text: 'Programado: Empaquetado del instalador actualizado para despliegue con cuenta de Administrador en los equipos de la operación.'
           }
         ]
       },
       {
         id: 'act-s4-2',
-        title: 'Semana 4: Manual de Operación y Reporte Final de Impacto Operativo (SLA 0s)',
+        title: 'Semana 4: Guía Rápida de Uso y Resumen de Resultados Operativos',
         role: 'Jefatura / Supervisión',
         dueDate: '2026-12-04',
         status: 'por_iniciar',
@@ -185,13 +180,13 @@ const INITIAL_PROJECTS = [
         notes: [
           {
             id: 'n-15',
-            date: '2026-11-28',
-            text: 'Manual de 1 página para supervisores sobre uso del selector de modos (Solo Saludo vs Completo) y protocolo de soporte ante incidencias.'
+            date: '2026-12-03',
+            text: 'Programado: Entrega de guía práctica sobre los modos de uso (Modo Solo Saludo y Modo Completo) y pasos básicos de verificación.'
           },
           {
             id: 'n-16',
-            date: '2026-11-29',
-            text: 'Informe consolidado para Jefatura: reducción del SLA de primer contacto a 0s, tasa de cumplimiento, eliminación de tickets desatendidos y blindaje de seguridad.'
+            date: '2026-12-04',
+            text: 'Programado: Presentación del resumen de resultados obtenidos (atención inmediata de tickets y mejoras de seguridad aplicadas).'
           }
         ]
       }
@@ -911,7 +906,7 @@ function openResumenModal() {
   } else if (overall === 100) {
     healthEl.innerHTML = `<span class="text-emerald-400 font-bold">🎉 Proyecto Completado:</span> Versión final v2.1.0 lista para despliegue masivo.`;
   } else {
-    healthEl.innerHTML = `<span class="text-cyan-400 font-bold">✔️ En orden:</span> Semana 1 completada al 100%. Semana 2 en ejecución activa con cronograma al día.`;
+    healthEl.innerHTML = `<span class="text-cyan-400 font-bold">✔️ En orden:</span> Semana 1 en ejecución activa. Se está avanzando con la revisión de seguridad de la API, el control de duplicados y el ordenamiento del código.`;
   }
 
   document.getElementById('resumenComplexity').textContent = COMPLEXITY_LABELS[current.complexity] || 'Muy Alta';
