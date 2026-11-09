@@ -4,60 +4,55 @@
  * Hoja de ruta y plan técnico de trabajo (Semanas 1 a 4)
  */
 
-const STORAGE_KEY = 'dev_roadmap_mao_laraigo_v3';
+const STORAGE_KEY = 'dev_roadmap_mao_laraigo_v4';
 
 // Project Seed Data: MÓDULO DE AGILIDAD OPERATIVA (MAO) — LARAIGO
 const INITIAL_PROJECTS = [
   {
     id: 'proj-mao-laraigo',
     title: 'MÓDULO DE AGILIDAD OPERATIVA (MAO) — LARAIGO',
-    description: 'Plan de trabajo y seguimiento semanal de mejoras a partir de la v2.0.3: revisión de seguridad de la API, control de duplicados, ordenamiento del código por bloques/carpetas y pruebas de estabilidad. Alcance: Área de Activaciones y Otras Áreas (80%).',
+    description: 'Plan de trabajo semanal a partir de la v2.0.3: revisión de seguridad de la API, corrección de mensajes duplicados, ordenamiento del código por bloques/carpetas y pruebas de estabilidad.',
     complexity: 'muy_alta', // baja | media | alta | muy_alta
     revisionFrequency: 'Semanal / Ventana Bi-semanal',
     estimatedHours: 160,
     deadline: '2026-12-04',
-    governance: 'Actualizaciones programadas cada 2 semanas con permisos de Administrador para mantener estable la operación.',
+    governance: 'Actualizaciones programadas cada 2 semanas con permisos de Administrador.',
     reviews: [
       {
         id: 'rev-1',
         date: '2026-11-09',
-        text: 'Inicio de Semana 1 (sobre base v2.0.3): Se comenzó la revisión de seguridad de la API y del manejo de sesión para que las credenciales no queden guardadas en el navegador.'
+        text: 'Inicio de Semana 1 (v2.0.3): Se comenzó a revisar la seguridad de la API y el manejo de la sesión para mayor protección.'
       },
       {
         id: 'rev-2',
         date: '2026-11-09',
-        text: 'Avance en curso: Se está revisando la validación de envío para evitar mensajes duplicados cuando el servidor demora en responder, junto con el ordenamiento del código en secciones claras.'
-      },
-      {
-        id: 'rev-3',
-        date: '2026-11-09',
-        text: 'Esquema de trabajo: Planificación de 4 semanas enfocada en proteger la estabilidad del Área de Activaciones (Modo Completo) y Otras Áreas (80% en Modo Solo Saludo).'
+        text: 'Avance en curso: Revisando el envío de mensajes para evitar duplicados cuando la red demora y ordenando el código por secciones.'
       }
     ],
     activities: [
       {
         id: 'act-s1-1',
-        title: 'Semana 1: Revisión de Seguridad de la API y Protección de Sesión',
+        title: 'Semana 1: Seguridad de la API y Protección de Sesión',
         role: 'Área de Activaciones / Soporte',
         dueDate: '2026-11-13',
         status: 'ejecucion',
-        progress: 45,
+        progress: 40,
         notes: [
           {
             id: 'n-1',
             date: '2026-11-09',
-            text: 'En avance: Se está modificando el manejo de la sesión para que el token de acceso funcione únicamente en memoria temporal (RAM) mientras se usa el sistema, evitando que quede guardado en el navegador.'
+            text: 'Avanzando en la revisión de seguridad de la API para que la sesión del usuario no quede guardada en el navegador y solo funcione mientras está abierta la página.'
           },
           {
             id: 'n-2',
             date: '2026-11-09',
-            text: 'En revisión: Ajustando la comunicación interna de la extensión y protegiendo las rutas de consulta a la API de Laraigo para mayor seguridad.'
+            text: 'Se están haciendo ajustes para proteger las consultas internas que hace el bot hacia Laraigo.'
           }
         ]
       },
       {
         id: 'act-s1-2',
-        title: 'Semana 1: Control de Mensajes Duplicados y Ordenamiento del Código por Bloques',
+        title: 'Semana 1: Revisión de Mensajes Duplicados y Ordenamiento del Código',
         role: 'Área de Activaciones / Soporte',
         dueDate: '2026-11-13',
         status: 'ejecucion',
@@ -66,19 +61,19 @@ const INITIAL_PROJECTS = [
           {
             id: 'n-3',
             date: '2026-11-09',
-            text: 'En avance: Revisando las validaciones al enviar respuestas por la API para evitar que un mismo mensaje se mande dos veces cuando la red o el servidor tardan en responder.'
+            text: 'Se está avanzando con las validaciones para evitar que se envíen mensajes duplicados cuando el sistema o la red demoran en responder.'
           },
           {
             id: 'n-4',
             date: '2026-11-09',
-            text: 'En progreso: Ordenando los archivos principales (page-bridge.js y content.js) en bloques numerados y comentados para que cada parte del código se entienda fácilmente.'
+            text: 'Ordenando el código en diferentes bloques separados y comentados para que cada sección se entienda mejor.'
           }
         ]
       },
       {
         id: 'act-s2-1',
-        title: 'Semana 2: Organización del Código en Carpetas (/src/) por Función',
-        role: 'Soporte Técnico / Arquitectura',
+        title: 'Semana 2: Organización de cada Bloque en Carpetas',
+        role: 'Soporte Técnico',
         dueDate: '2026-11-20',
         status: 'por_iniciar',
         progress: 0,
@@ -86,13 +81,13 @@ const INITIAL_PROJECTS = [
           {
             id: 'n-6',
             date: '2026-11-16',
-            text: 'Programado: Separar los bloques del código en carpetas individuales (/src/security, /src/network, /src/redux, /src/vision, /src/rules y /src/ui) para facilitar futuras mejoras.'
+            text: 'Por iniciar: Separar cada bloque del código en su propia carpeta (seguridad, red, interfaz, reglas) para tener el proyecto más ordenado.'
           }
         ]
       },
       {
         id: 'act-s2-2',
-        title: 'Semana 2: Revisión Línea por Línea del Código y Rendimiento en Turnos de 8h',
+        title: 'Semana 2: Revisión de Línea de Código y Rendimiento',
         role: 'Soporte Técnico',
         dueDate: '2026-11-20',
         status: 'por_iniciar',
@@ -101,19 +96,14 @@ const INITIAL_PROJECTS = [
           {
             id: 'n-7',
             date: '2026-11-17',
-            text: 'Programado: Revisión detallada línea por línea para limpiar variables que ya no se usen y mantener el navegador rápido durante toda la jornada de 8 horas.'
-          },
-          {
-            id: 'n-8',
-            date: '2026-11-18',
-            text: 'Programado: Pruebas de consumo de memoria para asegurar que la extensión se mantenga ligera en los equipos de los asesores.'
+            text: 'Por iniciar: Revisión línea por línea del código para limpiar funciones innecesarias y asegurar que el navegador trabaje fluido todo el turno.'
           }
         ]
       },
       {
         id: 'act-s3-1',
-        title: 'Semana 3: Pruebas de Estabilidad en Horas Pico (Varios Tickets a la Vez)',
-        role: 'Área de Activaciones (Piloto/BETA)',
+        title: 'Semana 3: Pruebas de Estabilidad con Varios Tickets en Simultáneo',
+        role: 'Área de Activaciones',
         dueDate: '2026-11-27',
         status: 'por_iniciar',
         progress: 0,
@@ -121,18 +111,13 @@ const INITIAL_PROJECTS = [
           {
             id: 'n-9',
             date: '2026-11-23',
-            text: 'Programado: Monitoreo en horas de alta demanda cuando entran de 5 a 10 tickets seguidos en la bandeja de Asignados, verificando que todos se respondan sin trabas.'
-          },
-          {
-            id: 'n-10',
-            date: '2026-11-24',
-            text: 'Programado: Revisión de reconexión automática ante micro-cortes de internet sin necesidad de recargar la página (F5).'
+            text: 'Por iniciar: Pruebas cuando ingresan varios tickets al mismo tiempo en horas pico y revisión ante cortes breves de internet.'
           }
         ]
       },
       {
         id: 'act-s3-2',
-        title: 'Semana 3: Revisión de Respuestas en Activaciones y Verificación en Otras Áreas',
+        title: 'Semana 3: Revisión de Casos de Activaciones y Otras Áreas',
         role: 'Activaciones / Otras Áreas',
         dueDate: '2026-11-27',
         status: 'por_iniciar',
@@ -141,18 +126,13 @@ const INITIAL_PROJECTS = [
           {
             id: 'n-11',
             date: '2026-11-25',
-            text: 'Programado: Revisión de precisión en los casos de Activaciones (Reenvío de señal, Consulta de Cintillos, Registro de Mesh, SOT de Manto, Derivación a PEXT y Activaciones).'
-          },
-          {
-            id: 'n-12',
-            date: '2026-11-26',
-            text: 'Programado: Verificación en Otras Áreas (80% desplegado en Modo Solo Saludo) para confirmar que el saludo inicial se envíe al instante sin interferir en el chat.'
+            text: 'Por iniciar: Verificación de respuestas automáticas en Activaciones y del Modo Solo Saludo en Otras Áreas.'
           }
         ]
       },
       {
         id: 'act-s4-1',
-        title: 'Semana 4: Cierre de Cambios y Preparación del Instalador Final',
+        title: 'Semana 4: Pruebas Finales y Preparación del Instalador',
         role: 'Soporte Técnico / Admin TI',
         dueDate: '2026-12-04',
         status: 'por_iniciar',
@@ -161,19 +141,14 @@ const INITIAL_PROJECTS = [
           {
             id: 'n-13',
             date: '2026-11-30',
-            text: 'Programado: Pruebas generales finales sin agregar nuevas funciones para asegurar que todo opere sin errores antes de actualizar los equipos.'
-          },
-          {
-            id: 'n-14',
-            date: '2026-12-02',
-            text: 'Programado: Empaquetado del instalador actualizado para despliegue con cuenta de Administrador en los equipos de la operación.'
+            text: 'Por iniciar: Revisión general de que todo funcione sin errores y armado del paquete final de actualización.'
           }
         ]
       },
       {
         id: 'act-s4-2',
-        title: 'Semana 4: Guía Rápida de Uso y Resumen de Resultados Operativos',
-        role: 'Jefatura / Supervisión',
+        title: 'Semana 4: Guía de Uso y Entrega de Resultados',
+        role: 'Supervisión / Jefatura',
         dueDate: '2026-12-04',
         status: 'por_iniciar',
         progress: 0,
@@ -181,12 +156,7 @@ const INITIAL_PROJECTS = [
           {
             id: 'n-15',
             date: '2026-12-03',
-            text: 'Programado: Entrega de guía práctica sobre los modos de uso (Modo Solo Saludo y Modo Completo) y pasos básicos de verificación.'
-          },
-          {
-            id: 'n-16',
-            date: '2026-12-04',
-            text: 'Programado: Presentación del resumen de resultados obtenidos (atención inmediata de tickets y mejoras de seguridad aplicadas).'
+            text: 'Por iniciar: Entrega de guía rápida de uso y resumen de las mejoras completadas en las 4 semanas.'
           }
         ]
       }
@@ -235,6 +205,11 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function loadProjects() {
+  try {
+    localStorage.removeItem('dev_roadmap_mao_laraigo_v1');
+    localStorage.removeItem('dev_roadmap_mao_laraigo_v2');
+    localStorage.removeItem('dev_roadmap_mao_laraigo_v3');
+  } catch (e) {}
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) {
     try {
