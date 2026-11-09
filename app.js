@@ -1,43 +1,199 @@
 /**
  * DevRoadmap & Project Tracker - Activity Tree & Project View
- * Inspired by executive workflow dashboard with interactive sliders, notes and review logs
+ * Módulo de Agilidad Operativa (MAO) — Laraigo
+ * Hoja de ruta y plan técnico de trabajo (Semanas 1 a 4)
  */
 
-const STORAGE_KEY = 'dev_roadmap_projects_tree_v1';
+const STORAGE_KEY = 'dev_roadmap_mao_laraigo_v2';
 
-// Initial template project matching the user's screenshot
+// Project Seed Data: MÓDULO DE AGILIDAD OPERATIVA (MAO) — LARAIGO
 const INITIAL_PROJECTS = [
   {
-    id: 'proj-demo-1',
-    title: 'Proyecto de Automatización y BI',
-    description: 'Implementación de diagnóstico de fuentes y desarrollo de flujos automatizados.',
-    complexity: 'alta', // baja | media | alta | muy_alta
-    revisionFrequency: 'Semanal',
-    estimatedHours: 80,
-    deadline: '2026-11-30',
+    id: 'proj-mao-laraigo',
+    title: 'MÓDULO DE AGILIDAD OPERATIVA (MAO) — LARAIGO',
+    description: 'Mapeo cronológico de auditorías, blindaje de seguridad, modularización por carpetas (/src/) y estabilización operativa desde v2.0.3 hacia v2.1.0. Alcance: Activaciones (Piloto/BETA) y Otras Áreas (Despliegue 80%).',
+    complexity: 'muy_alta', // baja | media | alta | muy_alta
+    revisionFrequency: 'Semanal / Ventana Bi-semanal',
+    estimatedHours: 160,
+    deadline: '2026-12-04',
+    governance: 'Despliegue manual con privilegios de Administrador mediante ventana de mantenimiento bi-semanal (instalador batch/VBS en HKLM).',
     reviews: [
-      { id: 'rev-1', date: '2026-10-15', text: 'Revisión inicial completada. Se detectaron fuentes pendientes de validación.' }
+      {
+        id: 'rev-1',
+        date: '2026-11-09',
+        text: 'Cierre de Semana 1 (v2.0.4 Hardened): Blindaje de API, purga de token en localStorage a variable volátil en RAM, handshake criptográfico (_nonce) y ofuscación de SQL (_k) completados al 100%. Código listo para pase a producción.'
+      },
+      {
+        id: 'rev-2',
+        date: '2026-11-09',
+        text: 'Apertura de Semana 2 (v2.0.5 Modular Architecture): Inicio de auditoría línea por línea contra memory leaks en turnos de 8h y desacoplamiento físico hacia carpetas /src/ (security, network, redux, vision, rules, ui).'
+      },
+      {
+        id: 'rev-3',
+        date: '2026-11-09',
+        text: 'Criterio de Gobernanza TI: Aprobado esquema de ventanas de mantenimiento bi-semanales con permisos de Administrador para proteger la continuidad operativa del 80% del parque desplegado en Otras Áreas.'
+      }
     ],
     activities: [
       {
-        id: 'act-1',
-        title: 'Diagnóstico de fuentes',
-        role: 'Analista BI',
-        dueDate: '2026-10-15',
-        status: 'atrasado', // atrasado | ejecucion | completado | por_iniciar
-        progress: 30,
+        id: 'act-s1-1',
+        title: 'Semana 1: Auditoría de Credenciales, Memoria RAM y Handshake Criptográfico (_nonce)',
+        role: 'Área de Activaciones / Soporte',
+        dueDate: '2026-11-13',
+        status: 'completado',
+        progress: 100,
         notes: [
-          { id: 'n-1', date: '2026-10-14', text: 'Pendiente acceso a la base de datos de producción.' }
+          {
+            id: 'n-1',
+            date: '2026-11-09',
+            text: 'Eliminación definitiva de localStorage.setItem("__lc_bearer_token") y purga de residuos en disco. Bearer Token encapsulado en variable privada de memoria RAM volátil para evitar robo de sesión en computadoras compartidas.'
+          },
+          {
+            id: 'n-2',
+            date: '2026-11-10',
+            text: 'Handshake criptográfico de sesión (_nonce): Firma aleatoria efímera compartida entre content.js y page-bridge.js. Comandos emitidos desde la consola F12 son rechazados y descartados silenciosamente.'
+          }
         ]
       },
       {
-        id: 'act-2',
-        title: 'Desarrollo de automatización',
-        role: 'Desarrollador',
+        id: 'act-s1-2',
+        title: 'Semana 1: Ofuscación de Endpoints, Candados de Idempotencia y Cero Duplicados DOM',
+        role: 'Área de Activaciones / Soporte',
+        dueDate: '2026-11-13',
+        status: 'completado',
+        progress: 100,
+        notes: [
+          {
+            id: 'n-3',
+            date: '2026-11-11',
+            text: 'Ofuscación de Endpoints y SQL: Enmascaramiento en memoria (_k) de rutas (/api/ticket/reply, /api/multi, /api/main) y procedimientos (UFN_CONVERSATION_SEL_INTERACTION). Restricción estricta a *.laraigo.com.'
+          },
+          {
+            id: 'n-4',
+            date: '2026-11-12',
+            text: 'Candados de Idempotencia y Concurrencia: inFlightReplies y recentSentReplies (<25s) con AbortController (9.5s) para garantizar 0 peticiones POST duplicadas ante latencia.'
+          },
+          {
+            id: 'n-5',
+            date: '2026-11-13',
+            text: 'Supresión de envío doble por DOM: Verificación del historial antes de teclear en caja de chat. Estructuración en 9 bloques (page-bridge.js) y 12 bloques (content.js).'
+          }
+        ]
+      },
+      {
+        id: 'act-s2-1',
+        title: 'Semana 2: Desacoplamiento Arquitectónico en Carpetas /src/ (v2.0.5)',
+        role: 'Soporte Técnico / Arquitectura',
         dueDate: '2026-11-20',
         status: 'ejecucion',
+        progress: 30,
+        notes: [
+          {
+            id: 'n-6',
+            date: '2026-11-14',
+            text: 'Migración a arquitectura limpia /src/: /src/security/ (nonce, token volátil, _k), /src/network/ (hooks XHR, fetch, apiPostJson), /src/redux/ (interceptor deduplicator), /src/vision/ (analizador Canvas TOA), /src/rules/ (árbol de decisiones) y /src/ui/ (pastilla de estado y controlador de modos).'
+          }
+        ]
+      },
+      {
+        id: 'act-s2-2',
+        title: 'Semana 2: Auditoría Línea por Línea contra Memory Leaks y Benchmarking (<35 MB)',
+        role: 'Soporte Técnico',
+        dueDate: '2026-11-20',
+        status: 'ejecucion',
+        progress: 15,
+        notes: [
+          {
+            id: 'n-7',
+            date: '2026-11-15',
+            text: 'Auditoría minuciosa de referencias para el recolector de basura (Garbage Collector), asegurando estabilidad en pestañas abiertas durante turnos continuos de 8 horas.'
+          },
+          {
+            id: 'n-8',
+            date: '2026-11-16',
+            text: 'Revisión de MutationObserver y addEventListener para desconexión limpia. Benchmarking estricto: consumo de RAM < 35 MB por pestaña en Core i3/i5 con 8GB RAM.'
+          }
+        ]
+      },
+      {
+        id: 'act-s3-1',
+        title: 'Semana 3: Pruebas de Estrés y Ráfagas de Tickets (v2.0.6 Release Candidate)',
+        role: 'Área de Activaciones (Piloto/BETA)',
+        dueDate: '2026-11-27',
+        status: 'por_iniciar',
         progress: 0,
-        notes: []
+        notes: [
+          {
+            id: 'n-9',
+            date: '2026-11-18',
+            text: 'Simulación y monitoreo en horas pico con recepción simultánea de 5 a 10 tickets en la bandeja de Asignados, evaluando respuesta asíncrona sin bloqueos.'
+          },
+          {
+            id: 'n-10',
+            date: '2026-11-19',
+            text: 'Resiliencia ante micro-cortes de red corporativa: auto-recuperación del Bearer Token sin requerir recargar la página (F5).'
+          }
+        ]
+      },
+      {
+        id: 'act-s3-2',
+        title: 'Semana 3: Calibración del Árbol de Activaciones (>98% precisión) y Auditoría Otras Áreas',
+        role: 'Activaciones / Otras Áreas',
+        dueDate: '2026-11-27',
+        status: 'por_iniciar',
+        progress: 0,
+        notes: [
+          {
+            id: 'n-11',
+            date: '2026-11-20',
+            text: 'Calibración de los 6 submotivos técnicos: Reenvío de señal, Consulta de Cintillos, Registro de Mesh, SOT de Manto, Derivación a PEXT y Activaciones (precisión esperada > 98%).'
+          },
+          {
+            id: 'n-12',
+            date: '2026-11-21',
+            text: 'Auditoría en "Otras Áreas" (Modo Solo Saludo): Verificación en el 80% del parque desplegado para confirmar 0% interferencia y envío exacto de saludo en 0s.'
+          }
+        ]
+      },
+      {
+        id: 'act-s4-1',
+        title: 'Semana 4: Feature Freeze y Generación del Paquete USB Consolidado (v2.1.0)',
+        role: 'Soporte Técnico / Admin TI',
+        dueDate: '2026-12-04',
+        status: 'por_iniciar',
+        progress: 0,
+        notes: [
+          {
+            id: 'n-13',
+            date: '2026-11-25',
+            text: 'Congelamiento estricto de código (Feature Freeze), compilación final de la extensión y batería de pruebas de regresión completas.'
+          },
+          {
+            id: 'n-14',
+            date: '2026-11-26',
+            text: 'Generación de paquete instalador automatizado para memoria USB (script batch/VBS para instalación con cuenta Admin en registro Windows HKLM sin borrado por cambio de usuario).'
+          }
+        ]
+      },
+      {
+        id: 'act-s4-2',
+        title: 'Semana 4: Manual de Operación y Reporte Final de Impacto Operativo (SLA 0s)',
+        role: 'Jefatura / Supervisión',
+        dueDate: '2026-12-04',
+        status: 'por_iniciar',
+        progress: 0,
+        notes: [
+          {
+            id: 'n-15',
+            date: '2026-11-28',
+            text: 'Manual de 1 página para supervisores sobre uso del selector de modos (Solo Saludo vs Completo) y protocolo de soporte ante incidencias.'
+          },
+          {
+            id: 'n-16',
+            date: '2026-11-29',
+            text: 'Informe consolidado para Jefatura: reducción del SLA de primer contacto a 0s, tasa de cumplimiento, eliminación de tickets desatendidos y blindaje de seguridad.'
+          }
+        ]
       }
     ]
   }
@@ -94,7 +250,6 @@ function loadProjects() {
       saveProjects();
     }
   } else {
-    // Start with the template matching the screenshot
     projects = JSON.parse(JSON.stringify(INITIAL_PROJECTS));
     saveProjects();
   }
@@ -119,14 +274,12 @@ function getActiveProject() {
 // EVENT LISTENERS
 // ==========================================
 function initEventListeners() {
-  // Project selector change
   const projectSelector = document.getElementById('projectSelector');
   projectSelector.addEventListener('change', (e) => {
     activeProjectId = e.target.value;
     renderApp();
   });
 
-  // Top header button
   document.getElementById('btnOpenNewProjectModal').addEventListener('click', () => openProjectModal(null));
   document.getElementById('btnExportData').addEventListener('click', exportDataJSON);
 
@@ -181,8 +334,7 @@ function renderApp() {
   welcomeSection.classList.add('hidden');
   projectSection.classList.remove('hidden');
 
-  // Update summary in header
-  const compLabel = COMPLEXITY_LABELS[currentProject.complexity] || 'Media';
+  const compLabel = COMPLEXITY_LABELS[currentProject.complexity] || 'Muy Alta';
   const hours = currentProject.estimatedHours ? `${currentProject.estimatedHours}h est.` : 'Horas no esp.';
   const freq = currentProject.revisionFrequency || 'Semanal';
   const overallProgress = calculateProjectProgress(currentProject);
@@ -191,13 +343,10 @@ function renderApp() {
     Complejidad: <span class="text-white font-medium">${compLabel}</span> | 
     Revisión: <span class="text-white font-medium">${freq}</span> | 
     Tiempos: <span class="text-white font-medium">${hours}</span> | 
-    Avance: <span class="text-cyan-400 font-bold">${overallProgress}%</span>
+    Avance Ponderado: <span class="text-cyan-400 font-bold">${overallProgress}%</span>
   `;
 
-  // Render activities
   renderActivities(currentProject);
-
-  // Reinitialize icons
   lucide.createIcons();
 }
 
@@ -267,7 +416,7 @@ function renderActivities(project) {
             </div>
             
             <div class="min-w-0 flex-1">
-              <h3 class="text-sm sm:text-base font-extrabold text-activityText tracking-tight truncate leading-snug">
+              <h3 class="text-sm sm:text-base font-extrabold text-activityText tracking-tight leading-snug">
                 ${escapeHtml(act.title)}
               </h3>
               
@@ -347,13 +496,13 @@ function renderActivities(project) {
           <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-navyBorder">
             <span class="font-bold text-cyan-400 flex items-center gap-1">
               <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
-              Notas de Revisión y Observaciones
+              Criterios Técnicos y Notas de Revisión
             </span>
-            <span class="text-[10px] text-slate-400">Actividad: ${escapeHtml(act.title)}</span>
+            <span class="text-[10px] text-slate-400 truncate max-w-xs">Actividad: ${escapeHtml(act.title)}</span>
           </div>
 
           <!-- Existing notes list -->
-          <div class="space-y-1.5 mb-3 max-h-36 overflow-y-auto" id="notes-list-${act.id}">
+          <div class="space-y-1.5 mb-3 max-h-48 overflow-y-auto" id="notes-list-${act.id}">
             ${renderActivityNotesList(act)}
           </div>
 
@@ -362,7 +511,7 @@ function renderActivities(project) {
             <input 
               type="text" 
               id="new-note-input-${act.id}" 
-              placeholder="Escribe una observación o avance..." 
+              placeholder="Registrar nueva observación o avance técnico..." 
               class="flex-1 bg-navyBg border border-navyBorder text-slate-100 text-xs rounded-lg px-3 py-1.5 focus:ring-1 focus:ring-cyan-400 focus:outline-none"
               onkeydown="if(event.key==='Enter'){ addActivityNote('${act.id}'); }"
             >
@@ -393,10 +542,10 @@ function renderActivityNotesList(act) {
     return '<p class="text-[11px] text-slate-400 italic">No hay notas registradas para esta actividad.</p>';
   }
   return act.notes.map(n => `
-    <div class="bg-navyBg/80 p-2 rounded-lg border border-navyBorder/80 flex items-start justify-between gap-2">
+    <div class="bg-navyBg/80 p-2.5 rounded-lg border border-navyBorder/80 flex items-start justify-between gap-2">
       <div class="min-w-0 flex-1">
-        <p class="text-xs text-slate-200">${escapeHtml(n.text)}</p>
-        <span class="text-[10px] text-slate-400 mt-0.5 block">${n.date}</span>
+        <p class="text-xs text-slate-200 leading-relaxed">${escapeHtml(n.text)}</p>
+        <span class="text-[10px] text-cyan-400 font-semibold mt-1 block">📅 ${n.date}</span>
       </div>
       <button onclick="deleteActivityNote('${act.id}', '${n.id}')" title="Eliminar nota" class="text-slate-500 hover:text-rose-400 p-0.5">
         <i data-lucide="trash" class="w-3 h-3"></i>
@@ -418,7 +567,6 @@ function handleSliderChange(activityId, value) {
   const numVal = Number(value);
   activity.progress = numVal;
 
-  // Auto-update status if reached 100%
   if (numVal === 100) {
     activity.status = 'completado';
   } else if (activity.status === 'completado' && numVal < 100) {
@@ -427,7 +575,6 @@ function handleSliderChange(activityId, value) {
     activity.status = 'ejecucion';
   }
 
-  // Update UI values instantly without full re-render for smooth 60fps drag
   const displayVal = document.getElementById(`progress-val-${activityId}`);
   if (displayVal) displayVal.textContent = `${numVal}%`;
 
@@ -437,22 +584,25 @@ function handleSliderChange(activityId, value) {
     miniBar.className = `h-2 rounded-full transition-all duration-150 ${getProgressFill(numVal)}`;
   }
 
-  // Update overall project progress in header
   const overall = calculateProjectProgress(current);
   const summaryEl = document.getElementById('activeProjectSummary');
   if (summaryEl) {
-    const compLabel = COMPLEXITY_LABELS[current.complexity] || 'Media';
-    const hours = current.estimatedHours ? `${current.estimatedHours}h est.` : 'Horas no esp.';
+    const compLabel = COMPLEXITY_LABELS[current.complexity] || 'Muy Alta';
+    const hours = currentProjectHoursFormatted(current);
     const freq = current.revisionFrequency || 'Semanal';
     summaryEl.innerHTML = `
       Complejidad: <span class="text-white font-medium">${compLabel}</span> | 
       Revisión: <span class="text-white font-medium">${freq}</span> | 
       Tiempos: <span class="text-white font-medium">${hours}</span> | 
-      Avance: <span class="text-cyan-400 font-bold">${overall}%</span>
+      Avance Ponderado: <span class="text-cyan-400 font-bold">${overall}%</span>
     `;
   }
 
   saveProjects();
+}
+
+function currentProjectHoursFormatted(p) {
+  return p.estimatedHours ? `${p.estimatedHours}h est.` : 'Horas no esp.';
 }
 
 // ==========================================
@@ -496,9 +646,8 @@ function addActivityNote(activityId) {
   input.value = '';
   saveProjects();
   renderApp();
-  showToast('Nota registrada');
+  showToast('Criterio técnico / nota guardada');
 
-  // Keep drawer open
   setTimeout(() => {
     const drawer = document.getElementById(`notes-drawer-${activityId}`);
     if (drawer) drawer.classList.remove('hidden');
@@ -585,7 +734,6 @@ function handleActivityFormSubmit(e) {
   const noteText = document.getElementById('formActivityNote').value.trim();
 
   if (id) {
-    // Edit existing activity
     const act = current.activities.find(a => a.id === id);
     if (act) {
       act.title = title;
@@ -604,7 +752,6 @@ function handleActivityFormSubmit(e) {
     }
     showToast('Actividad actualizada');
   } else {
-    // Add new activity
     const newAct = {
       id: `act-${Date.now()}`,
       title,
@@ -655,17 +802,18 @@ function openProjectModal(projectId = null) {
     document.getElementById('formProjectId').value = proj.id;
     document.getElementById('formProjectTitle').value = proj.title;
     document.getElementById('formProjectDesc').value = proj.description || '';
-    document.getElementById('formProjectComplexity').value = proj.complexity || 'media';
-    document.getElementById('formProjectFrequency').value = proj.revisionFrequency || 'Semanal';
-    document.getElementById('formProjectHours').value = proj.estimatedHours || 40;
-    document.getElementById('formProjectDeadline').value = proj.deadline || '';
+    document.getElementById('formProjectComplexity').value = proj.complexity || 'muy_alta';
+    document.getElementById('formProjectFrequency').value = proj.revisionFrequency || 'Semanal / Ventana Bi-semanal';
+    document.getElementById('formProjectHours').value = proj.estimatedHours || 160;
+    document.getElementById('formProjectDeadline').value = proj.deadline || '2026-12-04';
   } else {
     titleEl.textContent = 'Nuevo Proyecto';
     form.reset();
     document.getElementById('formProjectId').value = '';
-    document.getElementById('formProjectComplexity').value = 'alta';
-    document.getElementById('formProjectFrequency').value = 'Semanal';
-    document.getElementById('formProjectHours').value = 60;
+    document.getElementById('formProjectComplexity').value = 'muy_alta';
+    document.getElementById('formProjectFrequency').value = 'Semanal / Ventana Bi-semanal';
+    document.getElementById('formProjectHours').value = 160;
+    document.getElementById('formProjectDeadline').value = '2026-12-04';
   }
 
   modal.classList.remove('hidden');
@@ -757,20 +905,19 @@ function openResumenModal() {
   document.getElementById('resumenLateActivities').textContent = late;
   document.getElementById('resumenCompletedActivities').textContent = completed;
 
-  // Health text
   const healthEl = document.getElementById('resumenHealthText');
   if (late > 0) {
-    healthEl.innerHTML = `<span class="text-rose-400 font-bold">⚠️ Atención:</span> Hay ${late} actividad(es) atrasada(s). Se recomienda revisar bloqueos.`;
+    healthEl.innerHTML = `<span class="text-rose-400 font-bold">⚠️ Atención:</span> Hay ${late} actividad(es) atrasada(s). Se recomienda revisar bloqueos de red o accesos.`;
   } else if (overall === 100) {
-    healthEl.innerHTML = `<span class="text-emerald-400 font-bold">🎉 Proyecto Completado:</span> Todas las actividades han alcanzado el 100%.`;
+    healthEl.innerHTML = `<span class="text-emerald-400 font-bold">🎉 Proyecto Completado:</span> Versión final v2.1.0 lista para despliegue masivo.`;
   } else {
-    healthEl.innerHTML = `<span class="text-cyan-400 font-bold">✔️ En orden:</span> Proyecto en ejecución con cronograma al día.`;
+    healthEl.innerHTML = `<span class="text-cyan-400 font-bold">✔️ En orden:</span> Semana 1 completada al 100%. Semana 2 en ejecución activa con cronograma al día.`;
   }
 
-  document.getElementById('resumenComplexity').textContent = COMPLEXITY_LABELS[current.complexity] || 'Media';
+  document.getElementById('resumenComplexity').textContent = COMPLEXITY_LABELS[current.complexity] || 'Muy Alta';
   document.getElementById('resumenFrequency').textContent = current.revisionFrequency || 'Semanal';
   document.getElementById('resumenHours').textContent = current.estimatedHours ? `${current.estimatedHours} horas` : 'No asignado';
-  document.getElementById('resumenDeadline').textContent = current.deadline || 'Sin fecha fija';
+  document.getElementById('resumenDeadline').textContent = current.deadline ? `${current.deadline} (Cierre de 4 Semanas)` : 'Sin fecha fija';
 
   document.getElementById('resumenModal').classList.remove('hidden');
   lucide.createIcons();
@@ -810,7 +957,7 @@ function renderSeguimientoTimeline(project) {
   container.innerHTML = reviews.slice().reverse().map(rev => `
     <div class="bg-navyBg p-3 rounded-xl border border-navyBorder flex items-start justify-between gap-3">
       <div>
-        <p class="text-xs text-slate-200">${escapeHtml(rev.text)}</p>
+        <p class="text-xs text-slate-200 leading-relaxed">${escapeHtml(rev.text)}</p>
         <span class="text-[10px] text-cyan-400 font-semibold mt-1 block">📅 ${rev.date}</span>
       </div>
       <button onclick="deleteReview('${rev.id}')" title="Eliminar registro" class="text-slate-500 hover:text-rose-400 p-1">
@@ -882,11 +1029,11 @@ function exportDataJSON() {
   const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projects, null, 2));
   const downloadAnchor = document.createElement('a');
   downloadAnchor.setAttribute("href", dataStr);
-  downloadAnchor.setAttribute("download", `proyectos_procesos_${new Date().toISOString().slice(0, 10)}.json`);
+  downloadAnchor.setAttribute("download", `MAO_Laraigo_PlanTrabajo_${new Date().toISOString().slice(0, 10)}.json`);
   document.body.appendChild(downloadAnchor);
   downloadAnchor.click();
   downloadAnchor.remove();
-  showToast('Copia de seguridad descargada');
+  showToast('Plan de trabajo exportado en JSON');
 }
 
 function escapeHtml(string) {
