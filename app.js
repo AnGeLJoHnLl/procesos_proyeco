@@ -4,7 +4,7 @@
  * Hoja de ruta y plan técnico de trabajo (Semanas 1 a 4)
  */
 
-const STORAGE_KEY = 'dev_roadmap_mao_laraigo_v4';
+const STORAGE_KEY = 'dev_roadmap_mao_laraigo_v5';
 
 // Project Seed Data: MÓDULO DE AGILIDAD OPERATIVA (MAO) — LARAIGO
 const INITIAL_PROJECTS = [
@@ -21,12 +21,17 @@ const INITIAL_PROJECTS = [
       {
         id: 'rev-1',
         date: '2026-11-09',
-        text: 'Inicio de Semana 1 (v2.0.3): Se comenzó a revisar la seguridad de la API y el manejo de la sesión para mayor protección.'
+        text: 'Semana 1 completada: Seguridad de sesión protegida, eliminación de mensajes duplicados y bloqueo total de notificaciones en tickets cerrados.'
       },
       {
         id: 'rev-2',
-        date: '2026-11-09',
-        text: 'Avance en curso: Revisando el envío de mensajes para evitar duplicados cuando la red demora y ordenando el código por secciones.'
+        date: '2026-11-10',
+        text: 'Semana 2 completada: Organización de cada bloque de código en carpetas limpias en español y optimización de rendimiento para el turno diario.'
+      },
+      {
+        id: 'rev-3',
+        date: '2026-11-10',
+        text: 'Siguientes pasos: Pasando a Semana 3 para pruebas de estabilidad con flujo continuo de tickets y validación de áreas.'
       }
     ],
     activities: [
@@ -35,38 +40,38 @@ const INITIAL_PROJECTS = [
         title: 'Semana 1: Seguridad de la API y Protección de Sesión',
         role: 'Área de Activaciones / Soporte',
         dueDate: '2026-11-13',
-        status: 'ejecucion',
-        progress: 40,
+        status: 'completado',
+        progress: 100,
         notes: [
           {
             id: 'n-1',
             date: '2026-11-09',
-            text: 'Avanzando en la revisión de seguridad de la API para que la sesión del usuario no quede guardada en el navegador y solo funcione mientras está abierta la página.'
+            text: 'Completado: Se protegió la sesión del usuario para que las credenciales no queden guardadas en el navegador y solo funcionen mientras la pestaña está abierta.'
           },
           {
             id: 'n-2',
-            date: '2026-11-09',
-            text: 'Se están haciendo ajustes para proteger las consultas internas que hace el bot hacia Laraigo.'
+            date: '2026-11-10',
+            text: 'Completado: Se aseguraron las consultas internas hacia Laraigo evitando llamadas expuestas o desprotegidas.'
           }
         ]
       },
       {
         id: 'act-s1-2',
-        title: 'Semana 1: Revisión de Mensajes Duplicados y Ordenamiento del Código',
+        title: 'Semana 1: Revisión de Mensajes Duplicados y Corrección de Tickets Cerrados',
         role: 'Área de Activaciones / Soporte',
         dueDate: '2026-11-13',
-        status: 'ejecucion',
-        progress: 30,
+        status: 'completado',
+        progress: 100,
         notes: [
           {
             id: 'n-3',
             date: '2026-11-09',
-            text: 'Se está avanzando con las validaciones para evitar que se envíen mensajes duplicados cuando el sistema o la red demoran en responder.'
+            text: 'Completado: Se eliminaron los mensajes duplicados tanto en el primer saludo como en la segunda respuesta con candado doble por ticket y chat.'
           },
           {
             id: 'n-4',
-            date: '2026-11-09',
-            text: 'Ordenando el código en diferentes bloques separados y comentados para que cada sección se entienda mejor.'
+            date: '2026-11-10',
+            text: 'Completado: Se corrigió el problema donde el bot leía y notificaba tickets cerrados en computadoras donde el asesor ya había estado trabajando.'
           }
         ]
       },
@@ -75,13 +80,13 @@ const INITIAL_PROJECTS = [
         title: 'Semana 2: Organización de cada Bloque en Carpetas',
         role: 'Soporte Técnico',
         dueDate: '2026-11-20',
-        status: 'por_iniciar',
-        progress: 0,
+        status: 'completado',
+        progress: 100,
         notes: [
           {
             id: 'n-6',
-            date: '2026-11-16',
-            text: 'Por iniciar: Separar cada bloque del código en su propia carpeta (seguridad, red, interfaz, reglas) para tener el proyecto más ordenado.'
+            date: '2026-11-10',
+            text: 'Completado: Se ordenó todo el código en carpetas limpias en español (reglas de negocio, atención en segundo plano, conexión Laraigo e interfaz) para que sea fácil de entender y mantener.'
           }
         ]
       },
@@ -90,13 +95,13 @@ const INITIAL_PROJECTS = [
         title: 'Semana 2: Revisión de Línea de Código y Rendimiento',
         role: 'Soporte Técnico',
         dueDate: '2026-11-20',
-        status: 'por_iniciar',
-        progress: 0,
+        status: 'completado',
+        progress: 100,
         notes: [
           {
             id: 'n-7',
-            date: '2026-11-17',
-            text: 'Por iniciar: Revisión línea por línea del código para limpiar funciones innecesarias y asegurar que el navegador trabaje fluido todo el turno.'
+            date: '2026-11-10',
+            text: 'Completado: Revisión y limpieza del código para que funcione de manera ligera durante todo el turno y recarga automática de la extensión sin reiniciar el navegador.'
           }
         ]
       },
@@ -209,6 +214,7 @@ function loadProjects() {
     localStorage.removeItem('dev_roadmap_mao_laraigo_v1');
     localStorage.removeItem('dev_roadmap_mao_laraigo_v2');
     localStorage.removeItem('dev_roadmap_mao_laraigo_v3');
+    localStorage.removeItem('dev_roadmap_mao_laraigo_v4');
   } catch (e) {}
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) {
