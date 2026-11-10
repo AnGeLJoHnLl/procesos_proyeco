@@ -4,7 +4,7 @@
  * Hoja de ruta y plan técnico de trabajo (Semanas 1 a 4)
  */
 
-const STORAGE_KEY = 'dev_roadmap_mao_laraigo_v5';
+const STORAGE_KEY = 'dev_roadmap_mao_laraigo_v6';
 
 // Project Seed Data: MÓDULO DE AGILIDAD OPERATIVA (MAO) — LARAIGO
 const INITIAL_PROJECTS = [
@@ -52,6 +52,16 @@ const INITIAL_PROJECTS = [
             id: 'n-2',
             date: '2026-11-10',
             text: 'Completado: Se aseguraron las consultas internas hacia Laraigo evitando llamadas expuestas o desprotegidas.'
+          },
+          {
+            id: 'n-1-3',
+            date: '2026-11-10',
+            text: 'Completado: Limpieza automática de la memoria al cerrar la pestaña para que no queden datos residuales en el equipo del asesor.'
+          },
+          {
+            id: 'n-1-4',
+            date: '2026-11-10',
+            text: 'Completado: Pruebas de acceso confirmando que la extensión solo responde dentro del dominio oficial de Laraigo.'
           }
         ]
       },
@@ -72,6 +82,16 @@ const INITIAL_PROJECTS = [
             id: 'n-4',
             date: '2026-11-10',
             text: 'Completado: Se corrigió el problema donde el bot leía y notificaba tickets cerrados en computadoras donde el asesor ya había estado trabajando.'
+          },
+          {
+            id: 'n-1-5',
+            date: '2026-11-10',
+            text: 'Completado: Escudo de seguridad en pantalla con aviso visual de "Ticket Cerrado" que bloquea cualquier escritura accidental.'
+          },
+          {
+            id: 'n-1-6',
+            date: '2026-11-10',
+            text: 'Completado: Se ajustó el tiempo de espera de 5 segundos entre el saludo y la segunda pregunta para asegurar un ritmo natural.'
           }
         ]
       },
@@ -87,6 +107,21 @@ const INITIAL_PROJECTS = [
             id: 'n-6',
             date: '2026-11-10',
             text: 'Completado: Se ordenó todo el código en carpetas limpias en español (reglas de negocio, atención en segundo plano, conexión Laraigo e interfaz) para que sea fácil de entender y mantener.'
+          },
+          {
+            id: 'n-2-2',
+            date: '2026-11-10',
+            text: 'Completado: Módulo de Reglas y Catálogo (domain/) separado para gestionar los submotivos de Claro y los textos técnicos sin tocar la lógica de red.'
+          },
+          {
+            id: 'n-2-3',
+            date: '2026-11-10',
+            text: 'Completado: Módulo de Atención en Segundo Plano (application/) que permite atender tickets sin mover la pantalla ni interrumpir al asesor.'
+          },
+          {
+            id: 'n-2-4',
+            date: '2026-11-10',
+            text: 'Completado: Módulo Visual (presentation/) que controla la ventana flotante y el micro-cubo minimizable en pantalla.'
           }
         ]
       },
@@ -102,6 +137,21 @@ const INITIAL_PROJECTS = [
             id: 'n-7',
             date: '2026-11-10',
             text: 'Completado: Revisión y limpieza del código para que funcione de manera ligera durante todo el turno y recarga automática de la extensión sin reiniciar el navegador.'
+          },
+          {
+            id: 'n-2-5',
+            date: '2026-11-10',
+            text: 'Completado: Se agregaron pausas y límites de consultas para que el bot no sobrecargue la conexión de internet de la oficina.'
+          },
+          {
+            id: 'n-2-6',
+            date: '2026-11-10',
+            text: 'Completado: Se verificó la memoria RAM para evitar que el navegador se vuelva lento después de horas continuas de atención.'
+          },
+          {
+            id: 'n-2-7',
+            date: '2026-11-10',
+            text: 'Completado: Pruebas visuales en distintas pantallas y resoluciones asegurando que el cubito no tape botones importantes de Laraigo.'
           }
         ]
       },
@@ -117,6 +167,16 @@ const INITIAL_PROJECTS = [
             id: 'n-9',
             date: '2026-11-23',
             text: 'Por iniciar: Pruebas cuando ingresan varios tickets al mismo tiempo en horas pico y revisión ante cortes breves de internet.'
+          },
+          {
+            id: 'n-3-2',
+            date: '2026-11-24',
+            text: 'Por iniciar: Medición de tiempos de respuesta para asegurar que el primer saludo salga en menos de 2 segundos en todos los tickets en cola.'
+          },
+          {
+            id: 'n-3-3',
+            date: '2026-11-25',
+            text: 'Por iniciar: Validación de reconexión automática si el navegador pierde señal momentáneamente.'
           }
         ]
       },
@@ -132,6 +192,16 @@ const INITIAL_PROJECTS = [
             id: 'n-11',
             date: '2026-11-25',
             text: 'Por iniciar: Verificación de respuestas automáticas en Activaciones y del Modo Solo Saludo en Otras Áreas.'
+          },
+          {
+            id: 'n-3-5',
+            date: '2026-11-26',
+            text: 'Por iniciar: Comprobación de que el analizador de fotos diferencie correctamente capturas de la app TOA de fotos de cajas o repetidores.'
+          },
+          {
+            id: 'n-3-6',
+            date: '2026-11-27',
+            text: 'Por iniciar: Revisión del selector de modos para que cada asesor trabaje únicamente con la configuración de su equipo.'
           }
         ]
       },
@@ -147,6 +217,16 @@ const INITIAL_PROJECTS = [
             id: 'n-13',
             date: '2026-11-30',
             text: 'Por iniciar: Revisión general de que todo funcione sin errores y armado del paquete final de actualización.'
+          },
+          {
+            id: 'n-4-2',
+            date: '2026-12-01',
+            text: 'Por iniciar: Creación del archivo .zip listo para instalar en las computadoras de los asesores con un solo clic.'
+          },
+          {
+            id: 'n-4-3',
+            date: '2026-12-02',
+            text: 'Por iniciar: Lista de verificación paso a paso para soporte técnico durante la instalación masiva.'
           }
         ]
       },
@@ -162,6 +242,16 @@ const INITIAL_PROJECTS = [
             id: 'n-15',
             date: '2026-12-03',
             text: 'Por iniciar: Entrega de guía rápida de uso y resumen de las mejoras completadas en las 4 semanas.'
+          },
+          {
+            id: 'n-4-5',
+            date: '2026-12-04',
+            text: 'Por iniciar: Documento con capturas de pantalla para enseñar a los asesores cómo minimizar el cubo y leer notificaciones.'
+          },
+          {
+            id: 'n-4-6',
+            date: '2026-12-04',
+            text: 'Por iniciar: Comparativa de tiempos de atención para mostrar a supervisión el ahorro de tiempo logrado.'
           }
         ]
       }
@@ -215,6 +305,7 @@ function loadProjects() {
     localStorage.removeItem('dev_roadmap_mao_laraigo_v2');
     localStorage.removeItem('dev_roadmap_mao_laraigo_v3');
     localStorage.removeItem('dev_roadmap_mao_laraigo_v4');
+    localStorage.removeItem('dev_roadmap_mao_laraigo_v5');
   } catch (e) {}
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) {
